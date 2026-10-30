@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "milestone": "M1",
+  "milestone": "M2",
   "results": {
     "A1": {
       "pyhanko": {
@@ -8,6 +8,10 @@
         "score": "AGREE"
       },
       "pdfsig": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "dss": {
         "verdict": "VALID",
         "score": "AGREE"
       }
@@ -20,6 +24,10 @@
       "pdfsig": {
         "verdict": "INVALID",
         "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "INVALID",
+        "score": "AGREE"
       }
     },
     "B1": {
@@ -30,6 +38,108 @@
       "pdfsig": {
         "verdict": "INDETERMINATE",
         "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      }
+    },
+    "N1": {
+      "pyhanko": {
+        "verdict": "NO_SIGNATURE",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "NO_SIGNATURE",
+        "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "NO_SIGNATURE",
+        "score": "AGREE"
+      }
+    },
+    "B2": {
+      "pyhanko": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      }
+    },
+    "C1": {
+      "pyhanko": {
+        "verdict": "VALID_WITH_ALLOWED_CHANGES",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_ALLOWED_CHANGES",
+        "score": "AGREE"
+      }
+    },
+    "C2": {
+      "pyhanko": {
+        "verdict": "VALID_WITH_ALLOWED_CHANGES",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      }
+    },
+    "C3": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      }
+    },
+    "C4": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      }
+    },
+    "C5": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
       }
     }
   }
