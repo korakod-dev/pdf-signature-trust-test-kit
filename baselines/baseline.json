@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "milestone": "M2",
+  "milestone": "M3",
   "results": {
     "A1": {
       "pyhanko": {
@@ -140,6 +140,105 @@
       "dss": {
         "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
         "score": "PARTIAL"
+      }
+    },
+    "A3": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      }
+    },
+    "B3": {
+      "pyhanko": {
+        "verdict": "INDETERMINATE",
+        "score": "OVER_REJECTED"
+      },
+      "pdfsig": {
+        "verdict": "INDETERMINATE",
+        "score": "OVER_REJECTED"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      }
+    },
+    "B4": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      }
+    },
+    "B5": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "MISSED"
+      },
+      "pdfsig": {
+        "verdict": "TOOL_ERROR",
+        "score": "ERROR",
+        "recorded_tool_error": true
+      },
+      "dss": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      }
+    },
+    "D1": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "INFO"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "INFO"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "INFO"
+      }
+    },
+    "E1": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      }
+    },
+    "E2": {
+      "pyhanko": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "MISSED"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "MISSED"
       }
     }
   }
