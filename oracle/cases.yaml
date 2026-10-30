@@ -1,0 +1,270 @@
+# Expected verdicts, committed BEFORE any tool is run on any fixture.
+# Policy: reference-policy.md. Verdicts: verdict-model.md.
+#
+# spec_ref stays TODO until the clause has actually been read. n/a means the
+# basis is crypto or policy, so no standard clause is claimed.
+version: 1
+
+cases:
+  - id: A1
+    title: Normal signature chained to the trusted test root
+    milestone: M1
+    expected: VALID
+    informational: false
+    basis: crypto
+    spec_ref: n/a
+    rationale: >
+      The signature is computed over the whole file by a leaf that chains to the
+      only trust anchor, inside its validity window, with nothing appended.
+      Every acceptance condition holds and each one can be computed.
+    fixture_recipe: >
+      Generate an uncompressed base PDF. Sign once with the trusted test leaf.
+
+  - id: A2
+    title: One byte changed inside the signed range
+    milestone: M1
+    expected: INVALID
+    informational: false
+    basis: crypto
+    spec_ref: n/a
+    rationale: >
+      Changing one byte inside the signed range changes the digest, so the
+      signature cannot verify. File length and xref offsets stay the same, so a
+      tool cannot notice the change from the file structure alone.
+    fixture_recipe: >
+      Take the A1 output. Change exactly one byte in the uncompressed page
+      content, inside the ByteRange and outside /Contents.
+
+  - id: B1
+    title: Signed by a leaf under a second test root that is in no trust store
+    milestone: M1
+    expected: INDETERMINATE
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      The signature itself verifies, but no chain reaches the trust anchor. The
+      evidence is insufficient to accept, and nothing shows the signature is
+      broken, so the result is indeterminate and not invalid.
+    fixture_recipe: >
+      Same base PDF as A1. Sign with a leaf issued by a second throw-away root.
+      Do not add that root to any trust store.
+
+  - id: N1
+    title: Unsigned PDF, harness control
+    milestone: M2
+    expected: NO_SIGNATURE
+    informational: false
+    basis: crypto
+    spec_ref: n/a
+    rationale: The file contains no signature field, so there is nothing to validate.
+    fixture_recipe: The base PDF with no signing step.
+
+  - id: B2
+    title: Certificate expired, no timestamp
+    milestone: M2
+    expected: INDETERMINATE
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      The certificate is outside its validity window at validation time and no
+      proof of an earlier signing time exists. The claimed signing time alone is
+      not proof.
+    fixture_recipe: >
+      Sign with a leaf chaining to the trusted root whose validity ended by 2021,
+      with no timestamp.
+
+  - id: C1
+    title: Second valid signature appended; judge the first signature
+    milestone: M2
+    expected: VALID_WITH_ALLOWED_CHANGES
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      Adding a later signature in an incremental update is a normal workflow, so
+      the first signature stays acceptable and the change is a permitted one.
+    fixture_recipe: >
+      Sign with the trusted leaf, then append a second signature from a trusted
+      leaf in an incremental update. Report the first signature.
+
+  - id: C2
+    title: Certification signature permitting form fill, then a form field filled
+    milestone: M2
+    expected: VALID_WITH_ALLOWED_CHANGES
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: DocMDP level 2 permits form filling, so this change is permitted.
+    fixture_recipe: >
+      Base PDF with a form field. Certify with DocMDP 2. Fill the field in an
+      incremental update.
+
+  - id: C3
+    title: Certification signature permitting no changes, then a later change
+    milestone: M2
+    expected: INVALID
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: DocMDP level 1 permits no changes, so any later change violates it.
+    fixture_recipe: Certify with DocMDP 1. Change the document in an incremental update.
+
+  - id: C4
+    title: Incremental update replaces page content so the visible amount changes
+    milestone: M2
+    expected: INVALID
+    informational: false
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      The bytes that were signed still verify, but the document a reader sees is
+      no longer the one signed. Under the reference policy this is a disallowed
+      change, even with no DocMDP entry.
+    fixture_recipe: >
+      Sign without DocMDP. Replace the page content stream with a changed amount
+      in an incremental update.
+
+  - id: C5
+    title: Synthetic Shadow Attack, Hide variant, written by us
+    milestone: M2
+    expected: INVALID
+    informational: false
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      Content hidden at signing time and revealed by a later update changes what
+      a reader sees after signing, which is a disallowed change under the
+      reference policy. Written from the published description; no third-party
+      file is copied.
+    fixture_recipe: >
+      Our own minimal PDF following the published Hide description. Credit the
+      researchers in docs/related-work.md.
+
+  - id: A3
+    title: ByteRange leaves a gap wider than /Contents, with content outside the signature
+    milestone: M3
+    expected: INVALID
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      Bytes outside /Contents that the signature does not cover can change freely,
+      so the signature does not protect the whole revision.
+    fixture_recipe: >
+      Build a signature whose ByteRange gap extends past /Contents, and place
+      content in the extra gap.
+
+  - id: B3
+    title: Certificate expired now; trusted timestamp proves signing during validity
+    milestone: M3
+    expected: VALID
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      A trusted timestamp proves signing happened inside the validity window, and
+      the included revocation data shows the certificate was good at that time.
+    fixture_recipe: >
+      Expired leaf, local trusted TSA with a time inside the validity window,
+      revocation data embedded. Feasibility of a backdated timestamp is not yet
+      confirmed.
+
+  - id: B4
+    title: Certificate revoked before signing, with a timestamp after revocation
+    milestone: M3
+    expected: INVALID
+    acceptable: [INDETERMINATE]
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      The trusted time is after revocation, so the certificate was not good when
+      signed. INDETERMINATE is also acceptable because some models report missing
+      proof instead of a final failure.
+    fixture_recipe: Local CA revokes the leaf. Sign and timestamp after revocation.
+
+  - id: B5
+    title: Revocation source unreachable
+    milestone: M3
+    expected: INDETERMINATE
+    informational: false
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      Without revocation evidence, the "not revoked" condition cannot be shown, so
+      the policy does not accept the document.
+    fixture_recipe: Leaf with a revocation URL at a closed port on 127.0.0.1.
+
+  - id: D1
+    title: Name shown on the page differs from the certificate subject
+    milestone: M3
+    expected: VALID
+    informational: true
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      The signature is valid. No validator compares page text with the subject,
+      so this case records only whether the tool exposes the subject to a reader.
+    fixture_recipe: Page text names a different fake name from the certificate subject.
+
+  - id: E1
+    title: Valid signature timestamp from the local trusted TSA
+    milestone: M3
+    expected: VALID
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: A timestamp from a trusted TSA is added evidence and removes no condition.
+    fixture_recipe: Sign with a signature timestamp from the local trusted TSA on loopback.
+
+  - id: E2
+    title: Signature timestamp from an untrusted local TSA
+    milestone: M3
+    expected: INDETERMINATE
+    informational: false
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      A timestamp that does not chain to a trust anchor proves nothing, and the
+      policy treats unproven evidence that was offered as insufficient.
+    fixture_recipe: Sign with a signature timestamp from a local TSA under an untrusted root.
+
+  - id: F1
+    title: PDF/A-3b with embedded synthetic XML, signed, intact
+    milestone: M4
+    expected: VALID
+    informational: false
+    basis: spec
+    spec_ref: TODO
+    rationale: >
+      An intact signature over a valid PDF/A-3b with an attachment meets every
+      acceptance condition. Simulated scenario, not a conformance test.
+    fixture_recipe: >
+      Build a PDF/A-3b with synthetic XML attached. veraPDF must pass it before and
+      after signing.
+
+  - id: F2
+    title: Embedded XML replaced by an incremental update after signing; page unchanged
+    milestone: M4
+    expected: INVALID
+    informational: false
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      The attachment is part of the signed document, so replacing it is a
+      disallowed change even though the visible page is the same.
+    fixture_recipe: Take F1 and replace the attachment in an incremental update.
+
+  - id: F3
+    title: XML and visible page disagree before signing; nothing changes after signing
+    milestone: M4
+    expected: VALID
+    informational: true
+    basis: policy
+    spec_ref: n/a
+    rationale: >
+      The signature covers both as they were, so it verifies. Content agreement is
+      not a signature question, which is the point of recording this case.
+    fixture_recipe: Build as F1, with XML values that differ from the page text.

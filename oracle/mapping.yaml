@@ -1,0 +1,71 @@
+# Maps raw tool output to the common verdict model (verdict-model.md).
+#
+# Rules are ordered and the first match wins. Output that matches no rule is
+# TOOL_ERROR and fails gate 3. It never defaults to another verdict.
+#
+# Status: initial mapping from the project brief, committed before any tool has
+# been run. It still has to be confirmed against real tool output.
+version: 1
+
+pyhanko:
+  # Evaluated against the fields of the status object from
+  # validate_pdf_signature(). Field values are compared by name.
+  rules:
+    - id: invalid-any-failure
+      verdict: INVALID
+      any:
+        - {field: intact, equals: false}
+        - {field: valid, equals: false}
+        - {field: revoked, equals: true}
+        - {field: docmdp_ok, equals: false}
+        - {field: modification_level, equals: OTHER}
+        - {field: coverage_summary, equals: NONSTANDARD_COVERAGE}
+    - id: indeterminate-trust
+      verdict: INDETERMINATE
+      any:
+        - {field: trusted, equals: false}
+        - {field: timestamp_trusted, equals: false}
+    - id: valid-whole-file-or-lta
+      verdict: VALID
+      all:
+        - {field: bottom_line, equals: true}
+        - {field: modification_level, in: [NONE, LTA_UPDATES]}
+    - id: valid-form-filling
+      verdict: VALID_WITH_ALLOWED_CHANGES
+      all:
+        - {field: bottom_line, equals: true}
+        - {field: modification_level, equals: FORM_FILLING}
+  no_embedded_signatures: NO_SIGNATURE
+  exception: TOOL_ERROR
+
+pdfsig:
+  # The verdict comes from stdout. The exit code only separates "no report".
+  exit_codes:
+    "0": parse_stdout
+    "1": TOOL_ERROR
+    "2": NO_SIGNATURE
+    "*": TOOL_ERROR
+  signature_validation:
+    "Signature is Valid.": valid
+    "Signature is Invalid.": INVALID
+    "Digest Mismatch.": INVALID
+  certificate_validation:
+    "Certificate is Trusted.": trusted
+    "Certificate has been Revoked.": INVALID
+    "Certificate issuer isn't Trusted.": INDETERMINATE
+    "Certificate issuer is unknown.": INDETERMINATE
+    "Certificate has Expired": INDETERMINATE
+  coverage:
+    "Total document signed": VALID
+    "Not total document signed": VALID_WITH_UNCLASSIFIED_CHANGES
+  # Any other validation string is TOOL_ERROR.
+
+dss:
+  # Milestone M2. Unmodified default policy for the main results.
+  indications:
+    TOTAL-FAILED: INVALID
+    INDETERMINATE: INDETERMINATE
+  total_passed:
+    no_modification_warnings: VALID
+    only_signature_or_form_fill_modifications: VALID_WITH_ALLOWED_CHANGES
+    other_modification_warnings: VALID_WITH_UNCLASSIFIED_CHANGES

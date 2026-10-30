@@ -1,0 +1,22 @@
+# Key material must never enter the repository.
+*.key
+*.p12
+*.pfx
+*.pem
+
+# Generated at run time.
+/out/
+/results/
+/fixtures/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# OS
+.DS_Store
