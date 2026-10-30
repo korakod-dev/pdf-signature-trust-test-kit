@@ -2,6 +2,9 @@ package dev.trustkit.dss;
 
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
+import eu.europa.esig.dss.service.crl.OnlineCRLSource;
+import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
+import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
 import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
@@ -18,8 +21,9 @@ import java.util.Properties;
 /**
  * Validates one PDF with the unmodified default DSS policy and writes the raw reports.
  *
- * <p>Trusts only the given certificate. No CRL, OCSP or AIA source is configured, so DSS has
- * nowhere to fetch from. Interpreting the reports is left to the Python adapter and the mapping.
+ * <p>Trusts only the given certificate. Online sources are set so that revocation cases can reach
+ * the loopback service. Only certificates with URLs fetch, and the fixtures' URLs are on loopback.
+ * Interpreting the reports is left to the Python adapter and the mapping.
  *
  * <p>Usage: {@code --version}, or {@code <pdf> <trust anchor> <output directory>}.
  */
@@ -45,6 +49,9 @@ public final class Main {
         trusted.addCertificate(DSSUtils.loadCertificate(new File(args[1])));
         CommonCertificateVerifier verifier = new CommonCertificateVerifier();
         verifier.setTrustedCertSources(trusted);
+        verifier.setCrlSource(new OnlineCRLSource());
+        verifier.setOcspSource(new OnlineOCSPSource());
+        verifier.setAIASource(new DefaultAIASource());
 
         SignedDocumentValidator validator = SignedDocumentValidator.fromDocument(document);
         validator.setCertificateVerifier(verifier);

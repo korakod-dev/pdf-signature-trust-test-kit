@@ -55,14 +55,16 @@ jobs:
       - name: Gate 1, fixture, mapping, scoring and gate tests
         run: uv run --locked pytest -q
 
-      # The whole run happens in a network namespace with no route. --require-network-isolation
-      # refuses to start otherwise.
+      # The whole run happens in a network namespace with only loopback up and no route.
+      # --require-network-isolation refuses to start otherwise.
       - name: Run validators with no network
         run: |
-          sudo unshare --net -- setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
-            env "PATH=$PATH" "HOME=$HOME" "GITHUB_SHA=$GITHUB_SHA" \
-            "$GITHUB_WORKSPACE/.venv/bin/trustkit" run \
-              --milestone M2 --out out --require-network-isolation
+          sudo unshare --net -- sh -c '
+            ip link set lo up &&
+            exec setpriv --reuid="$1" --regid="$2" --init-groups \
+              env "PATH=$3" "HOME=$4" "GITHUB_SHA=$5" \
+              "$6/.venv/bin/trustkit" run --milestone M3 --out out --require-network-isolation
+          ' sh "$(id -u)" "$(id -g)" "$PATH" "$HOME" "$GITHUB_SHA" "$GITHUB_WORKSPACE"
 
       - name: Publish results to the job summary
         if: always()

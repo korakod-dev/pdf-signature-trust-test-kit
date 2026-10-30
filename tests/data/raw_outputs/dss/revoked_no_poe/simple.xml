@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T22:42:13Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>B4.pdf</DocumentName>
+    <ValidSignaturesCount>0</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-T" Id="S-ACBADF2BC054C576DFA555CDBDB65455526E882F3F8534C7FF38A73F9FFC7B29">
+        <CertificateChain>
+            <Certificate Id="C-5186DD21C5DAE886629490C22D1C95FDABF0F7490AD65F813C98FF04D542E6F4">
+                <QualifiedName>TEST ONLY Revoked Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-E6297ED06D210E8DC2E621274F7FA4DAB18571C35827E4DAFFA070673E867E1C" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>INDETERMINATE</Indication>
+        <SubIndication>REVOKED_NO_POE</SubIndication>
+        <AdESValidationDetails>
+            <Error Key="BBB_XCV_SUB_ANS">The certificate validation is not conclusive!</Error>
+            <Error Key="BBB_XCV_ISCR_ANS">The certificate is revoked!</Error>
+            <Error Key="ADEST_IRTPTBST_ANS">The revocation time is not after best-signature-time!</Error>
+            <Error Key="ARCH_LTAIVMP_ANS">No long term availability and integrity of validation material is present!</Error>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+            <Warning Key="QUAL_IS_ADES_IND">The signature/seal is an INDETERMINATE AdES digital signature!</Warning>
+        </QualificationDetails>
+        <SigningTime>2026-10-30T22:42:10Z</SigningTime>
+        <BestSignatureTime>2026-10-30T22:42:10Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Revoked Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-8F043844A5083BF6456CDE562C50B5F3BA49D0257266DCB05E11D797DD70A20E" name="Full PDF" scope="FULL">The document ByteRange : [0, 2391, 18607, 492]</SignatureScope>
+        <Timestamps>
+            <Timestamp Id="T-26314D5FFCED96CE17302AC5C90F8A2CB79F4178E005605E234D323DCDEB7328">
+                <CertificateChain>
+                    <Certificate Id="C-920CB378556262D29BB664707BFF35724FC0CF23935A55A63768CFE763119D57">
+                        <QualifiedName>TEST ONLY TSA - Not For Production</QualifiedName>
+                    </Certificate>
+                    <Certificate Id="C-E6297ED06D210E8DC2E621274F7FA4DAB18571C35827E4DAFFA070673E867E1C" trusted="true">
+                        <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+                    </Certificate>
+                </CertificateChain>
+                <Indication>PASSED</Indication>
+                <QualificationDetails>
+                    <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+                </QualificationDetails>
+                <ProductionTime>2026-10-30T22:42:10Z</ProductionTime>
+                <ProducedBy>TEST ONLY TSA - Not For Production</ProducedBy>
+                <TimestampLevel description="Not applicable">N/A</TimestampLevel>
+            </Timestamp>
+        </Timestamps>
+    </Signature>
+</SimpleReport>

@@ -174,3 +174,12 @@ def test_every_finding_in_the_baseline_has_a_review_label():
         for tool, entry in tools.items():
             if entry["score"] in ("MISSED", "PARTIAL"):
                 assert labels[(case_id, tool)]["label"] in allowed, (case_id, tool)
+
+
+def test_gate2_accepts_a_tool_error_recorded_by_name_only(clean_results):
+    row = clean_results["observations"][0]
+    row["verdict"], row["score"] = "TOOL_ERROR", "ERROR"
+    name = f"{row['case_id']}/{row['tool']}"
+    assert _gate(gates.check_all(clean_results, gates.baseline_from_results(clean_results)), 2)
+    baseline = gates.baseline_from_results(clean_results, (name,))
+    assert gates.check_all(clean_results, baseline) == []

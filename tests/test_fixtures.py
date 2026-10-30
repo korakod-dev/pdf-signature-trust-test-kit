@@ -25,7 +25,22 @@ def _identities(test_pki: pki.TestPki) -> tuple[pki.Identity, ...]:
         test_pki.other_leaf,
         test_pki.second_leaf,
         test_pki.expired_leaf,
+        test_pki.past_leaf,
+        test_pki.revoked_leaf,
+        test_pki.unreachable_leaf,
+        test_pki.tsa,
+        test_pki.other_tsa,
     )
+
+
+def _urls(cert: x509.Certificate) -> list[str]:
+    found = []
+    for extension in cert.extensions:
+        if isinstance(extension.value, x509.CRLDistributionPoints):
+            found += [n.value for p in extension.value for n in p.full_name]
+        if isinstance(extension.value, x509.AuthorityInformationAccess):
+            found += [d.access_location.value for d in extension.value]
+    return found
 
 
 def _subjects(certs: list[x509.Certificate]) -> set[str]:
@@ -111,14 +126,28 @@ def test_names_are_obviously_fake(built):
         assert "TEST ONLY" in subject and "Example Test Org" in subject
 
 
-def test_certificates_contain_no_urls(built):
+def test_every_certificate_url_is_on_loopback(built):
     test_pki, _, _ = built
     for identity in _identities(test_pki):
-        for extension in identity.cert.extensions:
-            assert not isinstance(
-                extension.value,
-                (x509.AuthorityInformationAccess, x509.CRLDistributionPoints),
-            )
+        for url in _urls(identity.cert):
+            assert url.startswith("http://127.0.0.1:"), url
+
+
+def test_only_the_certificates_that_need_a_revocation_url_have_one(built):
+    test_pki, _, _ = built
+    with_urls = {
+        i.cert.subject.rfc4514_string() for i in _identities(test_pki) if _urls(i.cert)
+    }
+    assert with_urls == {
+        i.cert.subject.rfc4514_string()
+        for i in (
+            test_pki.past_leaf,
+            test_pki.revoked_leaf,
+            test_pki.unreachable_leaf,
+            test_pki.tsa,
+            test_pki.other_tsa,
+        )
+    }
 
 
 def test_validity_windows_are_the_documented_dates(built):
@@ -161,7 +190,13 @@ def test_leaves_declare_no_revocation_data_and_the_root_does_not(built):
     ):
         extension = identity.cert.extensions.get_extension_for_oid(pki.NO_REV_AVAIL)
         assert extension.value.value == pki.ASN1_NULL and not extension.critical
-    assert pki.NO_REV_AVAIL not in [e.oid for e in test_pki.root.cert.extensions]
+    for identity in (
+        test_pki.root,
+        test_pki.past_leaf,
+        test_pki.revoked_leaf,
+        test_pki.unreachable_leaf,
+    ):
+        assert pki.NO_REV_AVAIL not in [e.oid for e in identity.cert.extensions]
 
 
 def test_n1_has_no_signature(built):
@@ -243,11 +278,94 @@ def test_c5_new_page_lists_one_content_stream_and_the_signed_page_lists_two(buil
 def test_every_active_case_has_a_fixture(built):
     from trustkit.oracle import cases_for
 
-    assert {c.id for c in cases_for("M2")} == set(built[1])
+    assert {c.id for c in cases_for("M3")} == set(built[1])
 
 
 def test_every_active_case_has_rationale_and_basis():
     from trustkit.oracle import cases_for
 
-    for case in cases_for("M2"):
+    for case in cases_for("M3"):
         assert case.rationale.strip() and case.basis in ("crypto", "spec", "policy")
+
+
+def test_a3_gap_is_wider_than_contents_and_the_signed_bytes_are_untouched(built):
+    a1 = _read(built, "A3")
+    region = inspect.signed_region(a1)
+    extra = inspect.bytes_after_contents(a1)
+    assert fixtures.UNSIGNED_MARKER in extra
+    assert not region.covers(a1.index(fixtures.UNSIGNED_MARKER))
+    assert region.start1 == 0 and region.start2 + region.length2 == len(a1)
+    assert inspect.digest_matches(a1)
+
+
+def test_a3_signature_still_verifies_by_independent_computation(built):
+    test_pki, _, _ = built
+    inspect.verify_signed_attributes(_read(built, "A3"), test_pki.leaf.cert)
+
+
+def test_b3_leaf_is_expired_and_the_timestamp_is_inside_its_window(built):
+    test_pki, built_fixtures, _ = built
+    cert = test_pki.past_leaf.cert
+    assert cert.not_valid_after_utc.year < 2021
+    timestamp = inspect.signature_timestamp(built_fixtures["B3"].signed_revision)
+    assert timestamp is not None
+    assert cert.not_valid_before_utc < timestamp[0] < cert.not_valid_after_utc
+
+
+def test_b3_later_bytes_embed_revocation_data_for_the_window(built):
+    test_pki, built_fixtures, _ = built
+    revision, later = _assert_later_update(built, "B3")
+    assert b"/DSS" in later and b"/CRLs" in later
+    crl = x509.load_der_x509_crl(fixtures.past_crl(test_pki.root))
+    cert = test_pki.past_leaf.cert
+    assert cert.not_valid_before_utc < crl.last_update_utc < cert.not_valid_after_utc
+    assert crl.get_revoked_certificate_by_serial_number(cert.serial_number) is None
+
+
+def test_b4_is_signed_and_timestamped_after_the_revocation_date(built):
+    test_pki, _, _ = built
+    data = _read(built, "B4")
+    timestamp = inspect.signature_timestamp(data)
+    assert timestamp is not None and timestamp[0] > pki.REVOKED_AT
+    inspect.verify_signed_attributes(data, test_pki.revoked_leaf.cert)
+
+
+def test_b5_urls_are_the_closed_port_only(built):
+    test_pki, _, _ = built
+    urls = _urls(test_pki.unreachable_leaf.cert)
+    assert urls and all(u.startswith(pki.CLOSED_URL) for u in urls)
+    assert pki.CLOSED_URL != pki.SERVICE_URL
+
+
+def test_d1_page_names_someone_other_than_the_certificate_subject(built):
+    test_pki, _, _ = built
+    data = _read(built, "D1")
+    assert fixtures.OTHER_NAME_TEXT.encode() in data
+    assert "Other Person" not in test_pki.leaf.cert.subject.rfc4514_string()
+    assert b"Other Person" not in test_pki.leaf.cert.subject.public_bytes()
+
+
+def test_e1_timestamp_chains_to_the_trust_anchor(built):
+    test_pki, _, _ = built
+    timestamp = inspect.signature_timestamp(_read(built, "E1"))
+    assert timestamp is not None
+    assert test_pki.tsa.cert in timestamp[1]
+    test_pki.tsa.cert.verify_directly_issued_by(test_pki.root.cert)
+
+
+def test_e2_timestamp_does_not_chain_to_the_trust_anchor(built):
+    test_pki, built_fixtures, _ = built
+    timestamp = inspect.signature_timestamp(_read(built, "E2"))
+    assert timestamp is not None
+    assert test_pki.other_tsa.cert in timestamp[1]
+    assert built_fixtures["E2"].trust_anchor is test_pki.root
+    with pytest.raises((ValueError, InvalidSignature)):
+        test_pki.other_tsa.cert.verify_directly_issued_by(test_pki.root.cert)
+
+
+def test_tsa_certificates_are_for_timestamping_only(built):
+    test_pki, _, _ = built
+    for identity in (test_pki.tsa, test_pki.other_tsa):
+        extension = identity.cert.extensions.get_extension_for_class(x509.ExtendedKeyUsage)
+        assert extension.critical
+        assert list(extension.value) == [x509.oid.ExtendedKeyUsageOID.TIME_STAMPING]

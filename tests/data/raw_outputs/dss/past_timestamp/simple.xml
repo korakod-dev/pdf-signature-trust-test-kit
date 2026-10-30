@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T22:42:12Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>B3.pdf</DocumentName>
+    <ValidSignaturesCount>1</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-LT" Id="S-FBBE48143DDB6E4EFD690CD572C4B08967361BA1222078A0DD37EA95DE5F7C53">
+        <CertificateChain>
+            <Certificate Id="C-028F589C64E6704ABC61A11C4D96EDB8FD641A0E8C66FFA1BF58610F0586EE84">
+                <QualifiedName>TEST ONLY Past Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-E6297ED06D210E8DC2E621274F7FA4DAB18571C35827E4DAFFA070673E867E1C" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>TOTAL_PASSED</Indication>
+        <AdESValidationDetails>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+        </QualificationDetails>
+        <ExtensionPeriodMax>2046-12-31T00:00:00Z</ExtensionPeriodMax>
+        <SigningTime>2020-06-15T12:00:00Z</SigningTime>
+        <BestSignatureTime>2020-06-15T12:00:00Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Past Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-07AC5EEF9C98D8CCFB220CB55424A138CCC1901F448E22D7575433AED523FF49" name="Partial PDF" scope="PARTIAL">The document ByteRange : [0, 2391, 18407, 492]</SignatureScope>
+        <Timestamps>
+            <Timestamp Id="T-E0B1EF67C7879CD5F18AB591116E70AB9F5F10437E839B7C57F5946FFCA347FF">
+                <CertificateChain>
+                    <Certificate Id="C-920CB378556262D29BB664707BFF35724FC0CF23935A55A63768CFE763119D57">
+                        <QualifiedName>TEST ONLY TSA - Not For Production</QualifiedName>
+                    </Certificate>
+                    <Certificate Id="C-E6297ED06D210E8DC2E621274F7FA4DAB18571C35827E4DAFFA070673E867E1C" trusted="true">
+                        <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+                    </Certificate>
+                </CertificateChain>
+                <Indication>PASSED</Indication>
+                <QualificationDetails>
+                    <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+                </QualificationDetails>
+                <ProductionTime>2020-06-15T12:00:00Z</ProductionTime>
+                <ProducedBy>TEST ONLY TSA - Not For Production</ProducedBy>
+                <TimestampLevel description="Not applicable">N/A</TimestampLevel>
+            </Timestamp>
+        </Timestamps>
+    </Signature>
+</SimpleReport>

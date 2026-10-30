@@ -1,15 +1,24 @@
 """Fixture recipes. One function per case id."""
 
+import datetime as dt
 import io
 from dataclasses import dataclass
 from pathlib import Path
 
+from asn1crypto import cms
+from asn1crypto import crl as asn1_crl
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from pyhanko.keys import load_cert_from_pemder, load_certs_from_pemder, load_private_key_from_pemder
 from pyhanko.pdf_utils import generic
 from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
 from pyhanko.pdf_utils.writer import PageObject, PdfFileWriter
 from pyhanko.sign import fields, signers
+from pyhanko.sign.timestamps.dummy_client import DummyTimeStamper
+from pyhanko.sign.validation.dss import DocumentSecurityStore
 from reportlab.pdfgen import canvas
 
+from trustkit.fixtures import inspect
 from trustkit.pki import Identity, TestPki
 
 AMOUNT_TEXT = b"Amount: 1000.00"
@@ -20,6 +29,12 @@ AMOUNT_TAMPER_BYTE = ord("9")
 CHANGED_AMOUNT_TEXT = b"Amount: 9000.00"
 FORM_FIELD_NAME = "TestField"
 FORM_FIELD_VALUE = "TEST ONLY filled value"
+# D1 shows this on the page. The certificate subject says something else.
+OTHER_NAME_TEXT = "Signed by: Example Other Person"
+# A3 puts this in the part of the ByteRange gap after /Contents.
+UNSIGNED_MARKER = b"% TEST ONLY content outside the signature"
+# B3: inside the window of the expired leaf, which ended in 2020.
+PAST_TIME = dt.datetime(2020, 6, 15, 12, 0, tzinfo=dt.timezone.utc)
 
 
 @dataclass(frozen=True)
@@ -32,7 +47,7 @@ class Fixture:
     signed_revision: bytes | None = None
 
 
-def base_pdf() -> bytes:
+def base_pdf(extra_line: str | None = None) -> bytes:
     """A one-page PDF with uncompressed page content, so byte edits are controlled."""
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pageCompression=0, invariant=1)
@@ -41,6 +56,8 @@ def base_pdf() -> bytes:
     pdf.drawString(72, 750, "TEST ONLY - synthetic document - Not For Production")
     pdf.drawString(72, 720, "Example Test Org")
     pdf.drawString(72, 690, AMOUNT_TEXT.decode("ascii"))
+    if extra_line:
+        pdf.drawString(72, 660, extra_line)
     pdf.showPage()
     pdf.save()
     return buffer.getvalue()
@@ -107,12 +124,37 @@ def layered_pdf() -> bytes:
     return buffer.getvalue()
 
 
+class _BackdatingSigner(signers.PdfSigner):
+    """pyHanko exposes no signing time, so B3 sets it on the signing session."""
+
+    def __init__(self, *args, signing_time: dt.datetime, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._signing_time = signing_time
+
+    def init_signing_session(self, *args, **kwargs):
+        session = super().init_signing_session(*args, **kwargs)
+        session.system_time = self._signing_time
+        return session
+
+
+def timestamper(tsa: Identity, issuer: Identity, at: dt.datetime | None = None) -> DummyTimeStamper:
+    """A TSA in this process, so no timestamp request leaves it. See docs/decisions.md."""
+    return DummyTimeStamper(
+        tsa_cert=load_cert_from_pemder(str(tsa.cert_path)),
+        tsa_key=load_private_key_from_pemder(str(tsa.key_path), passphrase=None),
+        certs_to_embed=list(load_certs_from_pemder([str(issuer.cert_path)])),
+        fixed_dt=at,
+    )
+
+
 def sign(
     data: bytes,
     signer_identity: Identity,
     issuer: Identity,
     field_name: str = "Signature1",
     docmdp: fields.MDPPerm | None = None,
+    tsa: DummyTimeStamper | None = None,
+    signing_time: dt.datetime | None = None,
 ) -> bytes:
     """Sign with the issuer embedded, so B1 also tests that a root in the file is not trusted.
 
@@ -133,7 +175,10 @@ def sign(
         certify=docmdp is not None,
         docmdp_permissions=docmdp or fields.MDPPerm.FILL_FORMS,
     )
-    return signers.sign_pdf(writer, meta, signer=signer).getvalue()
+    if signing_time is None:
+        return signers.sign_pdf(writer, meta, signer=signer, timestamper=tsa).getvalue()
+    pdf_signer = _BackdatingSigner(meta, signer, timestamper=tsa, signing_time=signing_time)
+    return pdf_signer.sign_pdf(writer).getvalue()
 
 
 def tamper_amount(signed: bytes) -> bytes:
@@ -241,6 +286,46 @@ def remove_overlay(signed: bytes) -> bytes:
     return _update(signed, change)
 
 
+def widen_byte_range_gap(signed: bytes) -> bytes:
+    """A3: end /Contents early, and put bytes in the rest of the gap.
+
+    The signed bytes and the ByteRange do not change, so the signature still verifies.
+    """
+    region = inspect.signed_region(signed)
+    start, end = region.start1 + region.length1, region.start2
+    hex_digits = signed[start + 1 : end - 1]
+    cms_length = len(cms.ContentInfo.load(bytes.fromhex(hex_digits.decode("ascii"))).dump())
+    contents = b"<" + hex_digits[: 2 * cms_length] + b">\n" + UNSIGNED_MARKER
+    return signed[:start] + contents.ljust(end - start - 1) + b"\n" + signed[end:]
+
+
+def past_crl(root: Identity) -> bytes:
+    """B3: a CRL from inside the leaf's validity window, which lists nothing."""
+    key = serialization.load_pem_private_key(root.key_path.read_bytes(), password=None)
+    return (
+        x509.CertificateRevocationListBuilder()
+        .issuer_name(root.cert.subject)
+        .last_update(PAST_TIME + dt.timedelta(days=1))
+        .next_update(PAST_TIME + dt.timedelta(days=180))
+        .sign(key, hashes.SHA256())
+        .public_bytes(serialization.Encoding.DER)
+    )
+
+
+def embed_revocation_data(signed: bytes, root: Identity, crl: bytes) -> bytes:
+    """B3: add a document security store with the CRL, in an incremental update."""
+
+    def change(writer: IncrementalPdfFileWriter) -> None:
+        DocumentSecurityStore.supply_dss_in_writer(
+            writer,
+            None,
+            certs=[load_cert_from_pemder(str(root.cert_path))],
+            crls=[asn1_crl.CertificateList.load(crl)],
+        )
+
+    return _update(signed, change)
+
+
 def _write(out_dir: Path, contents: dict[str, tuple]) -> dict[str, Fixture]:
     out_dir.mkdir(parents=True, exist_ok=True)
     built = {}
@@ -292,4 +377,43 @@ def build_m2(out_dir: Path, pki: TestPki) -> dict[str, Fixture]:
     }
 
 
-BUILDERS = {"M1": build_m1, "M2": build_m2}
+def build_m3(out_dir: Path, pki: TestPki) -> dict[str, Fixture]:
+    base = base_pdf()
+    plain = sign(base, pki.leaf, pki.root)
+    # Trust anchor is the first root, so the second TSA stays untrusted in E2.
+    past = sign(
+        base,
+        pki.past_leaf,
+        pki.root,
+        tsa=timestamper(pki.tsa, pki.root, at=PAST_TIME),
+        signing_time=PAST_TIME,
+    )
+    return {
+        **build_m2(out_dir, pki),
+        **_write(
+            out_dir,
+            {
+                "A3": (widen_byte_range_gap(plain), pki.root),
+                "B3": (embed_revocation_data(past, pki.root, past_crl(pki.root)), pki.root, past),
+                "B4": (
+                    sign(base, pki.revoked_leaf, pki.root, tsa=timestamper(pki.tsa, pki.root)),
+                    pki.root,
+                ),
+                "B5": (sign(base, pki.unreachable_leaf, pki.root), pki.root),
+                "D1": (sign(base_pdf(OTHER_NAME_TEXT), pki.leaf, pki.root), pki.root),
+                "E1": (sign(base, pki.leaf, pki.root, tsa=timestamper(pki.tsa, pki.root)), pki.root),
+                "E2": (
+                    sign(
+                        base,
+                        pki.leaf,
+                        pki.root,
+                        tsa=timestamper(pki.other_tsa, pki.other_root),
+                    ),
+                    pki.root,
+                ),
+            },
+        ),
+    }
+
+
+BUILDERS = {"M1": build_m1, "M2": build_m2, "M3": build_m3}

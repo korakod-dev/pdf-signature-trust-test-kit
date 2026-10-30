@@ -1,0 +1,12 @@
+Digital Signature Info of: /tmp/out/pdf/B4.pdf
+Signature #1:
+  - Signature Field Name: Signature1
+  - Signer Certificate Common Name: TEST ONLY Revoked Signer - Not For Production
+  - Signer full Distinguished Name: CN=TEST ONLY Revoked Signer - Not For Production,O=Example Test Org
+  - Signing Time: Oct 30 2026 22:42:10
+  - Signing Hash Algorithm: SHA-256
+  - Signature Type: ETSI.CAdES.detached
+  - Signed Ranges: [0 - 2391], [18607 - 19099]
+  - Total document signed
+  - Signature Validation: Signature is Valid.
+  - Certificate Validation: Certificate has been Revoked.

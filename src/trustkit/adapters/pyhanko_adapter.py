@@ -12,7 +12,9 @@ from pyhanko_certvalidator import ValidationContext
 
 from trustkit.adapters.base import TOOL_ERROR, Observation, sha256_file
 
-OPTIONS = ["ValidationContext(trust_roots=[case trust anchor], allow_fetching=False)"]
+# Fetching is off by default. It is on so that revocation cases can reach the loopback
+# service. Only certificates with URLs fetch, and those URLs are on loopback.
+OPTIONS = ["ValidationContext(trust_roots=[case trust anchor], allow_fetching=True)"]
 COVERAGE_TOKENS = ("UNTOUCHED", "EXTENDED", "NONSTANDARD_COVERAGE")
 
 
@@ -105,7 +107,7 @@ class PyHankoAdapter:
         )
         try:
             context = ValidationContext(
-                trust_roots=[load_cert_from_pemder(str(trust_anchor))], allow_fetching=False
+                trust_roots=[load_cert_from_pemder(str(trust_anchor))], allow_fetching=True
             )
             with pdf.open("rb") as stream:
                 embedded = PdfFileReader(stream).embedded_signatures

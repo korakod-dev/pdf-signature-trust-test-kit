@@ -10,7 +10,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from trustkit import fixtures, gates, pki, report, scan
+from trustkit import fixtures, gates, pki, report, scan, services
 from trustkit.adapters.dss_adapter import DssAdapter
 from trustkit.adapters.pdfsig_adapter import PdfsigAdapter
 from trustkit.adapters.pyhanko_adapter import PyHankoAdapter
@@ -55,20 +55,22 @@ def run_cases(milestone: str, out_dir: Path) -> dict:
     ) as work:
         test_pki = pki.generate(certs_dir, Path(keys))
         built = fixtures.BUILDERS[milestone](fixtures_dir, test_pki)
-        for case in cases:
-            fixture = built[case.id]
-            for adapter in adapters:
-                work_dir = Path(work) / case.id / adapter.name
-                work_dir.mkdir(parents=True)
-                observation = adapter.validate(
-                    case.id, fixture.path, fixture.trust_anchor.cert_path, work_dir
-                )
-                (raw_dir / f"{case.id}.{adapter.name}.txt").write_text(
-                    observation.raw_output, encoding="utf-8"
-                )
-                row = observation.to_dict()
-                row["score"] = score(case, observation.verdict)
-                observations.append(row)
+        with services.RevocationService(test_pki) as revocation:
+            for case in cases:
+                fixture = built[case.id]
+                for adapter in adapters:
+                    work_dir = Path(work) / case.id / adapter.name
+                    work_dir.mkdir(parents=True)
+                    observation = adapter.validate(
+                        case.id, fixture.path, fixture.trust_anchor.cert_path, work_dir
+                    )
+                    (raw_dir / f"{case.id}.{adapter.name}.txt").write_text(
+                        observation.raw_output, encoding="utf-8"
+                    )
+                    row = observation.to_dict()
+                    row["score"] = score(case, observation.verdict)
+                    row["signals"]["revocation_requests"] = revocation.take_requests()
+                    observations.append(row)
 
     return {
         "milestone": milestone,
@@ -129,7 +131,11 @@ def command_write_baseline(args: argparse.Namespace) -> int:
     results = json.loads(args.results.read_text(encoding="utf-8"))
     args.baseline.parent.mkdir(parents=True, exist_ok=True)
     args.baseline.write_text(
-        json.dumps(gates.baseline_from_results(results), indent=2) + "\n", encoding="utf-8"
+        json.dumps(
+            gates.baseline_from_results(results, tuple(args.record_tool_error)), indent=2
+        )
+        + "\n",
+        encoding="utf-8",
     )
     return 0
 
@@ -139,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
 
     run = commands.add_parser("run", help="generate fixtures and run the validators")
-    run.add_argument("--milestone", default="M2", choices=sorted(TOOLS_BY_MILESTONE))
+    run.add_argument("--milestone", default="M3", choices=sorted(TOOLS_BY_MILESTONE))
     run.add_argument("--out", type=Path, default=ROOT / "out")
     run.add_argument("--require-network-isolation", action="store_true")
     run.set_defaults(func=command_run)
@@ -156,6 +162,13 @@ def main(argv: list[str] | None = None) -> int:
     write = commands.add_parser("write-baseline", help="write a baseline from a results file")
     write.add_argument("--results", type=Path, required=True)
     write.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    write.add_argument(
+        "--record-tool-error",
+        action="append",
+        default=[],
+        metavar="CASE/TOOL",
+        help="accept this TOOL_ERROR in the baseline",
+    )
     write.set_defaults(func=command_write_baseline)
 
     args = parser.parse_args(argv)

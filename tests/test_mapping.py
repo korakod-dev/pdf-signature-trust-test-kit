@@ -30,7 +30,8 @@ def _pdfsig(name: str) -> tuple[str, int]:
         ("issuer_unknown", "INDETERMINATE", False),
         ("no_signatures", "NO_SIGNATURE", False),
         ("unreadable_file", "TOOL_ERROR", False),
-        ("no_ocsp_generic_cert_error", "TOOL_ERROR", True),
+        ("no_ocsp_generic_cert_error", "TOOL_ERROR", False),
+        ("certificate_revoked", "INVALID", False),
         ("certificate_expired", "INDETERMINATE", False),
         ("second_signature", "VALID_WITH_UNCLASSIFIED_CHANGES", False),
     ],
@@ -53,6 +54,7 @@ def test_pdfsig_captures_are_all_exercised():
         "no_ocsp_generic_cert_error",
         "certificate_expired",
         "second_signature",
+        "certificate_revoked",
     }
     assert {p.stem for p in PDFSIG.glob("*.stdout")} == parametrized
 
@@ -61,7 +63,6 @@ def test_pdfsig_captures_are_all_exercised():
     "line, verdict",
     [
         ("Signature Validation: Signature is Invalid.", "INVALID"),
-        ("Certificate Validation: Certificate has been Revoked.", "INVALID"),
     ],
 )
 def test_pdfsig_synthetic_lines_not_yet_observed(mapping, line, verdict):
@@ -198,6 +199,11 @@ DSS_CAPTURES = [
     ("docmdp1_annotation", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["AnnotationChange"]),
     ("content_replaced", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["Undefined", "VisualDifference"]),
     ("overlay_removed", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["Undefined", "VisualDifference"]),
+    ("byte_range_gap", "INVALID", "FORMAT_FAILURE", []),
+    ("past_timestamp", "VALID", None, ["ExtensionChange"]),
+    ("revoked_no_poe", "INDETERMINATE", "REVOKED_NO_POE", []),
+    ("revocation_unreachable", "INDETERMINATE", "CERTIFICATE_CHAIN_GENERAL_FAILURE", []),
+    ("untrusted_timestamp", "VALID", None, []),
 ]
 
 
@@ -258,3 +264,17 @@ def test_dss_unknown_output_never_defaults_to_a_verdict(mapping, name, old, new)
 
 def test_dss_annotation_only_is_not_reported_as_allowed(mapping):
     assert parse_reports(*_dss("docmdp1_annotation"), mapping)[2] == "passed-other-modifications"
+
+
+def test_dss_records_the_timestamp_indications(mapping):
+    assert parse_reports(*_dss("past_timestamp"), mapping)[3]["timestamps"] == [
+        {"indication": "PASSED", "sub_indication": None}
+    ]
+    assert parse_reports(*_dss("untrusted_timestamp"), mapping)[3]["timestamps"] == [
+        {"indication": "INDETERMINATE", "sub_indication": "NO_CERTIFICATE_CHAIN_FOUND"}
+    ]
+
+
+def test_pdfsig_generic_certificate_message_is_an_explicit_tool_error_not_a_verdict(mapping):
+    stdout, exit_code = _pdfsig("no_ocsp_generic_cert_error")
+    assert parse_report(stdout, exit_code, mapping)[:2] == ("TOOL_ERROR", False)

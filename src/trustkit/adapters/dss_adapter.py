@@ -15,7 +15,7 @@ DIAGNOSTIC = "{http://dss.esig.europa.eu/validation/diagnostic}"
 OPTIONS = [
     "default validation policy",
     "CommonTrustedCertificateSource(case trust anchor)",
-    "no CRL, OCSP or AIA source",
+    "OnlineCRLSource, OnlineOCSPSource and DefaultAIASource, for certificates with URLs",
 ]
 
 
@@ -73,6 +73,13 @@ def parse_reports(
         "indication": indication,
         "sub_indication": signature.findtext(f"{SIMPLE}SubIndication"),
         "modifications": modifications,
+        "timestamps": [
+            {
+                "indication": t.findtext(f"{SIMPLE}Indication"),
+                "sub_indication": t.findtext(f"{SIMPLE}SubIndication"),
+            }
+            for t in signature.findall(f"{SIMPLE}Timestamps/{SIMPLE}Timestamp")
+        ],
         "errors": errors,
         "warnings": others,
         "signer_subject": signature.findtext(f"{SIMPLE}SignedBy"),
@@ -87,7 +94,8 @@ def parse_reports(
         return outcome, False, f"indication-{indication}", signals
 
     allowed = set(table["allowed_modifications"])
-    known = allowed | set(table["other_modifications"])
+    extensions = set(table["extension_modifications"])
+    known = allowed | extensions | set(table["other_modifications"])
     unknown = sorted(set(modifications) - known)
     if unknown:
         return TOOL_ERROR, True, None, {**signals, "problem": f"unmapped modification {unknown}"}
@@ -96,9 +104,10 @@ def parse_reports(
     if unknown or errors:
         return TOOL_ERROR, True, None, {**signals, "problem": f"unmapped message {unknown + errors}"}
 
-    if not modifications and not warnings & set(others):
+    significant = set(modifications) - extensions
+    if not significant and not warnings & set(others):
         return "VALID", False, "passed-no-modifications", signals
-    if set(modifications) <= allowed and not warnings & set(others):
+    if significant <= allowed and not warnings & set(others):
         return "VALID_WITH_ALLOWED_CHANGES", False, "passed-allowed-modifications", signals
     return "VALID_WITH_UNCLASSIFIED_CHANGES", False, "passed-other-modifications", signals
 

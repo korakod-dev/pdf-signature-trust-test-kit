@@ -9,7 +9,11 @@ ROOT = Path(__file__).resolve().parents[2]
 ORACLE_DIR = ROOT / "oracle"
 
 MILESTONES = ("M1", "M2", "M3", "M4")
-TOOLS_BY_MILESTONE = {"M1": ("pyhanko", "pdfsig"), "M2": ("pyhanko", "pdfsig", "dss")}
+TOOLS_BY_MILESTONE = {
+    "M1": ("pyhanko", "pdfsig"),
+    "M2": ("pyhanko", "pdfsig", "dss"),
+    "M3": ("pyhanko", "pdfsig", "dss"),
+}
 
 
 @dataclass(frozen=True)

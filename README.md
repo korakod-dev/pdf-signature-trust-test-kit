@@ -9,7 +9,7 @@ It is not new vulnerability research, not a legal or compliance verdict, not an
 e-Tax conformance test, and not a ranking of tools. It reports behavior per case,
 tool version and configuration.
 
-**Status:** milestone M2 (10 cases, on pyHanko, pdfsig and EU DSS).
+**Status:** milestone M3 (17 cases, on pyHanko, pdfsig and EU DSS).
 
 **License:** to be decided before public release.
 
@@ -27,7 +27,7 @@ Requires Python 3.12, [uv](https://docs.astral.sh/uv/), `poppler-utils` and
 uv sync --locked
 mvn -B -q -f adapters/dss-runner/pom.xml package
 uv run pytest
-uv run trustkit run --milestone M2 --out out
+uv run trustkit run --milestone M3 --out out
 uv run trustkit check --results out/results.json
 uv run trustkit scan
 ```
@@ -58,7 +58,8 @@ result.
 - `oracle/`: expected verdicts, reference policy, verdict model, mapping, review
   labels for findings, and the log of changes to expected values.
 - `adapters/dss-runner/`: thin Java command line around EU DSS.
-- `src/trustkit/`: PKI, fixtures, adapters, scoring, gates, report, CLI.
+- `src/trustkit/`: PKI, fixtures, local revocation service, adapters, scoring, gates,
+  report, CLI.
 - `baselines/baseline.json`: the committed expected scored results.
 - `tests/data/raw_outputs/`: captured output of an unrelated throw-away PDF.
 - `docs/decisions.md`: corrections to the original brief and the choices made.

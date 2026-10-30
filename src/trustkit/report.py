@@ -42,6 +42,29 @@ def render_markdown(results: dict) -> str:
         options = next(row["options"] for row in results["observations"] if row["tool"] == tool)
         lines.append(f"- {tool}: {'; '.join(options)}")
 
+    informational = [c["id"] for c in results["cases"] if c["informational"]]
+    if informational:
+        lines += ["", "## Informational cases", ""]
+        for case_id in informational:
+            for tool in tools:
+                row = by_key.get((case_id, tool))
+                if row:
+                    shown = row["signals"].get("signer_subject_shown", False)
+                    lines.append(f"- {case_id}/{tool}: signer subject shown: {shown}")
+
+    disagreements = [
+        row
+        for row in results["observations"]
+        if row["score"] in ("OVER_REJECTED", "REJECTED_DIFFERENTLY", "ERROR", "MISMATCH")
+    ]
+    if disagreements:
+        lines += ["", "## Other results that differ from the oracle", ""]
+        for row in disagreements:
+            lines.append(f"- {row['case_id']}/{row['tool']}: {row['score']} ({row['verdict']})")
+
+    requests = sum(len(r["signals"].get("revocation_requests", [])) for r in results["observations"])
+    lines += ["", f"Requests to the local revocation service: {requests}"]
+
     findings = [
         row for row in results["observations"] if row["score"] in ("MISSED", "PARTIAL")
     ]

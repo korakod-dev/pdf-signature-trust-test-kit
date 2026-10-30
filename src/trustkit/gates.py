@@ -7,14 +7,18 @@ fails gate 4 only if it differs from the committed baseline.
 from trustkit.oracle import TOOLS_BY_MILESTONE, cases_for
 
 
-def baseline_from_results(results: dict) -> dict:
-    """Keep only what must be stable: per-case verdict and score, no run-specific data."""
+def baseline_from_results(results: dict, record_tool_errors: tuple[str, ...] = ()) -> dict:
+    """Keep only what must be stable: per-case verdict and score, no run-specific data.
+
+    record_tool_errors lists "case/tool" entries whose TOOL_ERROR is accepted. Gate 2
+    fails on any other TOOL_ERROR, so this has to be asked for by name.
+    """
     entries: dict = {}
     for row in results["observations"]:
-        entries.setdefault(row["case_id"], {})[row["tool"]] = {
-            "verdict": row["verdict"],
-            "score": row["score"],
-        }
+        entry = {"verdict": row["verdict"], "score": row["score"]}
+        if row["verdict"] == "TOOL_ERROR" and f"{row['case_id']}/{row['tool']}" in record_tool_errors:
+            entry["recorded_tool_error"] = True
+        entries.setdefault(row["case_id"], {})[row["tool"]] = entry
     return {"version": 1, "milestone": results["milestone"], "results": entries}
 
 

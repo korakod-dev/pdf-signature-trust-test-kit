@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T22:42:14Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>B5.pdf</DocumentName>
+    <ValidSignaturesCount>0</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-B" Id="S-3214BDC0ADA58A434D68E692CCC884F9CB0B623D7EF0CC71B9986ED7FCD0C648">
+        <CertificateChain>
+            <Certificate Id="C-A4EBA834376C5392D7C2611DDA80E56F1EF71590B07037ADA8A6458CF94F3ECB">
+                <QualifiedName>TEST ONLY Unreachable Revocation Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-E6297ED06D210E8DC2E621274F7FA4DAB18571C35827E4DAFFA070673E867E1C" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>INDETERMINATE</Indication>
+        <SubIndication>CERTIFICATE_CHAIN_GENERAL_FAILURE</SubIndication>
+        <AdESValidationDetails>
+            <Error Key="BBB_XCV_SUB_ANS">The certificate validation is not conclusive!</Error>
+            <Error Key="BBB_XCV_IRDPFC_ANS">No revocation data found for the certificate!</Error>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+            <Warning Key="QUAL_IS_ADES_IND">The signature/seal is an INDETERMINATE AdES digital signature!</Warning>
+        </QualificationDetails>
+        <SigningTime>2026-10-30T22:42:10Z</SigningTime>
+        <BestSignatureTime>2026-10-30T22:42:14Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Unreachable Revocation Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-8F043844A5083BF6456CDE562C50B5F3BA49D0257266DCB05E11D797DD70A20E" name="Full PDF" scope="FULL">The document ByteRange : [0, 2391, 10243, 492]</SignatureScope>
+    </Signature>
+</SimpleReport>

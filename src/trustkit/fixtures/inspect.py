@@ -3,6 +3,7 @@
 Uses no validator. Anything proven here does not depend on pyHanko's verdicts.
 """
 
+import datetime as dt
 import hashlib
 import re
 from dataclasses import dataclass
@@ -50,10 +51,35 @@ def signed_regions(data: bytes) -> list[SignedRegion]:
 def _signed_data(data: bytes) -> cms.SignedData:
     region = signed_region(data)
     gap = data[region.start1 + region.length1 : region.start2]
-    if not (gap.startswith(b"<") and gap.endswith(b">")):
-        raise ValueError("the ByteRange gap is not exactly the /Contents hex string")
-    content_info = cms.ContentInfo.load(bytes.fromhex(gap[1:-1].decode("ascii")))
+    if not gap.startswith(b"<") or b">" not in gap:
+        raise ValueError("the ByteRange gap does not start with the /Contents hex string")
+    hex_digits = gap[1 : gap.index(b">")]
+    content_info = cms.ContentInfo.load(bytes.fromhex(hex_digits.decode("ascii")))
     return content_info["content"]
+
+
+def bytes_after_contents(data: bytes) -> bytes:
+    """What the ByteRange gap holds after the end of the /Contents string."""
+    region = signed_region(data)
+    gap = data[region.start1 + region.length1 : region.start2]
+    return gap[gap.index(b">") + 1 :]
+
+
+def signature_timestamp(data: bytes) -> tuple[dt.datetime, list[x509.Certificate]] | None:
+    """The time and certificates of the signature timestamp token, if there is one."""
+    attributes = _signed_data(data)["signer_infos"][0]["unsigned_attrs"]
+    if attributes.native is None:
+        return None
+    for attribute in attributes:
+        if attribute["type"].native == "signature_time_stamp_token":
+            token = attribute["values"][0]["content"]
+            info = token["encap_content_info"]["content"].parsed
+            certs = [
+                x509.load_der_x509_certificate(choice.chosen.dump())
+                for choice in token["certificates"]
+            ]
+            return info["gen_time"].native, certs
+    return None
 
 
 def embedded_certificates(data: bytes) -> list[x509.Certificate]:
