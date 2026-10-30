@@ -142,6 +142,68 @@ Under the brief's rule ("only signature or form-fill modifications") that is an
 other warning, so the mapping gives `VALID_WITH_UNCLASSIFIED_CHANGES`. The rule was
 not loosened to fit case C2.
 
+## M3
+
+### `-no-ocsp` stays off
+
+M3 reopened this, as planned. Without the flag, pdfsig contacts the OCSP URL in a
+certificate, and B4 then reports `Certificate has been Revoked.`. With the flag on
+poppler 24.02 no good chain can be trusted at all. So the harness still does not pass it.
+
+### Validators may fetch, and only loopback answers
+
+To see revocation, pyHanko runs with `allow_fetching=True`, which is not its default,
+and DSS has `OnlineCRLSource`, `OnlineOCSPSource` and `DefaultAIASource`. Both are
+listed in the results. Only certificates with URLs fetch, and a test requires every
+URL in the kit's certificates to be on `127.0.0.1`. In CI the run is in a network
+namespace where only the loopback interface is up, with no route. Each observation
+records the requests the local service saw.
+
+### TSA, CRL and OCSP
+
+- **CRL and OCSP:** `trustkit.services`, a small HTTP service on `127.0.0.1:18765`,
+  started for the length of a run. Port 18766 is never bound, for B5.
+- **TSA:** pyHanko's `DummyTimeStamper`, called in the same process when a fixture is
+  built. No timestamp request reaches any network, which is stricter than loopback.
+- **Certomancer is not used.** `DummyTimeStamper` takes a fixed time, so B3 is
+  feasible without it. pyHanko exposes no signing time, so a small subclass sets it on
+  the signing session.
+
+### The default DSS policy requires revocation data for a TSA
+
+The policy has no `noRevAvail` exemption for timestamp certificates. A sample with a
+`noRevAvail` TSA gave a timestamp of `INDETERMINATE`, which DSS then ignored without
+changing the signature's result. That made E1 look fine while its timestamp had failed,
+and made B3 impossible. So both TSA certificates, and the B3 leaf, have a CRL URL on
+loopback instead. Results now record each timestamp's own indication.
+
+B3 has its CRL in a document security store, as its recipe says, and its leaf also has
+a CRL URL. DSS and pyHanko fetched from that URL in the samples, so these results do
+not show that a tool can rely on the embedded CRL alone.
+
+### pdfsig: `Unknown issue with Certificate or corrupted data.`
+
+On B5 pdfsig prints this, with an unreachable OCSP URL. It was unmapped on purpose, but
+gate 3 then fails on every run.
+
+1. Map it to `INDETERMINATE`, which would agree with the oracle for B5. The string
+   does not say the cause, so this would claim more than the tool does. Rejected.
+2. Map it to an explicit `TOOL_ERROR`, and record that in the baseline, as gate 2
+   allows. Chosen. This scores `ERROR`.
+
+### DSS: `ExtensionChange` counts as no modification
+
+DSS gives no warning for it, and the brief's rule for `VALID` is "no modification
+warnings". The pyHanko rules treat `LTA_UPDATES` the same way. This affects only B3,
+and it was decided after seeing B3 in a sample, so it is listed here on purpose.
+
+### How far the M3 samples go
+
+As in M2, the tools ran on samples before the first real run, this time with the same
+recipe functions and a fresh PKI for each sample, and in a container set up like CI. So
+the M3 behavior was visible before the first real run. Besides the mapping, the samples
+changed the TSA and B3 certificates, as described above. `cases.yaml` did not change.
+
 ## Changes to `oracle/mapping.yaml` before the first real run
 
 Version 1 is the brief's mapping, committed before any sampling. Version 2 follows
@@ -157,6 +219,8 @@ sampling:
 
 Version 3 replaces the placeholder DSS section with the real one, before DSS has run
 on any fixture.
+
+Version 4 adds the two M3 entries above, before the first real M3 run.
 
 No expected value in `cases.yaml` changed.
 

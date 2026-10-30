@@ -3,10 +3,10 @@
 # Rules are ordered and the first match wins. Output that matches no rule is
 # TOOL_ERROR and fails gate 3. It never defaults to another verdict.
 #
-# Status: pyHanko and pdfsig used on real fixtures since M1. DSS confirmed against
-# DSS 6.5.1 output from throw-away PDFs, before its first real run. See
+# Status: pyHanko and pdfsig used on real fixtures since M1, and DSS since M2. M3
+# additions confirmed against throw-away PDFs, before the first real M3 run. See
 # docs/decisions.md for what changed from the initial mapping and why.
-version: 3
+version: 4
 
 pyhanko:
   # Evaluated against the fields of the status object from
@@ -65,9 +65,10 @@ pdfsig:
     - "  - Signature Type: "
     - "  - Signed Ranges: "
   # A signature is judged on these, in this order. A string not listed here is
-  # unmapped. That includes "Unknown issue with Certificate or corrupted data.",
-  # which poppler 24.02 prints for a good chain when given -no-ocsp, so the
-  # harness does not pass -no-ocsp (docs/decisions.md).
+  # unmapped. "Unknown issue with Certificate or corrupted data." does not say what
+  # went wrong, so it is an explicit TOOL_ERROR, which needs a baseline record. poppler
+  # 24.02 prints it when OCSP is unreachable, and for a good chain when given -no-ocsp
+  # (docs/decisions.md).
   signature_validation:
     "Signature is Valid.": valid
     "Signature is Invalid.": INVALID
@@ -78,6 +79,7 @@ pdfsig:
     "Certificate issuer isn't Trusted.": INDETERMINATE
     "Certificate issuer is unknown.": INDETERMINATE
     "Certificate has Expired": INDETERMINATE
+    "Unknown issue with Certificate or corrupted data.": TOOL_ERROR
   coverage:
     "Total document signed": VALID
     "Not total document signed": VALID_WITH_UNCLASSIFIED_CHANGES
@@ -95,8 +97,11 @@ dss:
   # data, names confirmed in DiagnosticData.xsd. Any other name is unmapped.
   allowed_modifications:
     - SignatureOrFormFill
-  other_modifications:
+  # Validation material added in a later update. DSS gives no warning for it, so it
+  # counts as no modification, like LTA_UPDATES in the pyHanko rules.
+  extension_modifications:
     - ExtensionChange
+  other_modifications:
     - AnnotationChange
     - Undefined
     - AnnotationOverlap
