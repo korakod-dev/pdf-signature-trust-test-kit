@@ -1,0 +1,12 @@
+Digital Signature Info of: other.pdf
+Signature #1:
+  - Signature Field Name: Sig1
+  - Signer Certificate Common Name: SAMPLE Other Leaf
+  - Signer full Distinguished Name: O=Sampling Throwaway,CN=SAMPLE Other Leaf
+  - Signing Time: Oct 30 2026 08:55:17
+  - Signing Hash Algorithm: SHA-256
+  - Signature Type: ETSI.CAdES.detached
+  - Signed Ranges: [0 - 2420], [6310 - 7385]
+  - Total document signed
+  - Signature Validation: Signature is Valid.
+  - Certificate Validation: Certificate issuer isn't Trusted.

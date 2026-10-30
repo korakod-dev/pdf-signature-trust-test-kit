@@ -3,13 +3,20 @@
 # Rules are ordered and the first match wins. Output that matches no rule is
 # TOOL_ERROR and fails gate 3. It never defaults to another verdict.
 #
-# Status: initial mapping from the project brief, committed before any tool has
-# been run. It still has to be confirmed against real tool output.
-version: 1
+# Status: confirmed against pyHanko 0.38.0 and pdfsig 24.02.0 output from an
+# unrelated throw-away PDF. Still before the first real run. See
+# docs/decisions.md for what changed from the initial mapping and why.
+version: 2
 
 pyhanko:
   # Evaluated against the fields of the status object from
-  # validate_pdf_signature(). Field values are compared by name.
+  # validate_pdf_signature(). Field values are compared by name. A rule with both
+  # "all" and "any" needs both to hold. coverage_summary is the coverage token
+  # from status.summary_fields().
+  #
+  # Deliberately unmapped: ANNOTATIONS, and EXTENDED_WITH_NONE (bytes after the
+  # signed revision with no semantic change). They become TOOL_ERROR until a case
+  # needs them and someone decides.
   rules:
     - id: invalid-any-failure
       verdict: INVALID
@@ -29,7 +36,9 @@ pyhanko:
       verdict: VALID
       all:
         - {field: bottom_line, equals: true}
-        - {field: modification_level, in: [NONE, LTA_UPDATES]}
+      any:
+        - {field: coverage, equals: ENTIRE_FILE}
+        - {field: modification_level, equals: LTA_UPDATES}
     - id: valid-form-filling
       verdict: VALID_WITH_ALLOWED_CHANGES
       all:
@@ -44,7 +53,21 @@ pdfsig:
     "0": parse_stdout
     "1": TOOL_ERROR
     "2": NO_SIGNATURE
-    "*": TOOL_ERROR
+  # Lines that carry no verdict. Any other stdout line is unmapped.
+  informational_lines:
+    - "Digital Signature Info of: "
+    - "Signature #"
+    - "  - Signature Field Name: "
+    - "  - Signer Certificate Common Name: "
+    - "  - Signer full Distinguished Name: "
+    - "  - Signing Time: "
+    - "  - Signing Hash Algorithm: "
+    - "  - Signature Type: "
+    - "  - Signed Ranges: "
+  # A signature is judged on these, in this order. A string not listed here is
+  # unmapped. That includes "Unknown issue with Certificate or corrupted data.",
+  # which poppler 24.02 prints for a good chain when given -no-ocsp, so the
+  # harness does not pass -no-ocsp (docs/decisions.md).
   signature_validation:
     "Signature is Valid.": valid
     "Signature is Invalid.": INVALID
@@ -58,7 +81,6 @@ pdfsig:
   coverage:
     "Total document signed": VALID
     "Not total document signed": VALID_WITH_UNCLASSIFIED_CHANGES
-  # Any other validation string is TOOL_ERROR.
 
 dss:
   # Milestone M2. Unmodified default policy for the main results.

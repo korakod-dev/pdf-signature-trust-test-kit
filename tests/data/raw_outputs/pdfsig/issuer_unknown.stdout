@@ -1,0 +1,12 @@
+Digital Signature Info of: /w/noembed.pdf
+Signature #1:
+  - Signature Field Name: S
+  - Signer Certificate Common Name: V Leaf noembed
+  - Signer full Distinguished Name: CN=V Leaf noembed
+  - Signing Time: Oct 30 2026 08:57:40
+  - Signing Hash Algorithm: SHA-256
+  - Signature Type: ETSI.CAdES.detached
+  - Signed Ranges: [0 - 2201], [6421 - 6926]
+  - Total document signed
+  - Signature Validation: Signature is Valid.
+  - Certificate Validation: Certificate issuer is unknown.
