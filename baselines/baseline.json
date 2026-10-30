@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "milestone": "M1",
+  "results": {
+    "A1": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      }
+    },
+    "A2": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      }
+    },
+    "B1": {
+      "pyhanko": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "INDETERMINATE",
+        "score": "AGREE"
+      }
+    }
+  }
+}
