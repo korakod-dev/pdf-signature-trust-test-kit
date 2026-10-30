@@ -127,3 +127,20 @@ not changed since. As in M2, the tools first ran on samples from the same recipe
    Baseline:
    [`badf75a`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/badf75a),
    which changes [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
+
+### M4
+
+The expected verdicts for F1, F2 and F3 are also in `79b32c8`, and have not changed since.
+The mapping did not change for M4. As in M2 and M3, the tools first ran on samples from
+the same recipes. See "How far the M4 samples go" in [`docs/decisions.md`](docs/decisions.md).
+
+1. Fixtures, veraPDF check and tests:
+   [`f8267eb`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/f8267eb).
+2. First real run:
+   [CI run 41142561948](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41142561948)
+   on `f8267eb`, red at gate 4 because the baseline was still for M3.
+3. Review labels:
+   [`abb96cf`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/abb96cf).
+   Baseline:
+   [`408785a`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/408785a),
+   which changes [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
