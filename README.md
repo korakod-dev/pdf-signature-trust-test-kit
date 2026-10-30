@@ -65,4 +65,19 @@ result.
 
 ## Commit order
 
-Filled in once the baseline exists.
+1. Oracle: [`79b32c8`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/79b32c8)
+   pre-registers the expected verdicts, and
+   [`2ee992a`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/2ee992a)
+   confirms the mapping against output from an unrelated throw-away PDF.
+2. Generator, adapters and tests:
+   [`ce6b4b4`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/ce6b4b4).
+3. First real run:
+   [CI run 41084416912](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41084416912)
+   on `ce6b4b4`, red at gate 4 because no baseline existed yet.
+4. Baseline:
+   [`1b241bc`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/1b241bc),
+   which adds [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
+
+The first three commits reached GitHub in one push, so their relative order rests
+on self-reported commit dates and on git ancestry. The first externally timestamped
+event is the CI run on `ce6b4b4`.
