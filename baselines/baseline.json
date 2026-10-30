@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "milestone": "M3",
+  "milestone": "M4",
   "results": {
     "A1": {
       "pyhanko": {
@@ -239,6 +239,48 @@
       "dss": {
         "verdict": "VALID",
         "score": "MISSED"
+      }
+    },
+    "F1": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "AGREE"
+      }
+    },
+    "F2": {
+      "pyhanko": {
+        "verdict": "INVALID",
+        "score": "AGREE"
+      },
+      "pdfsig": {
+        "verdict": "VALID_WITH_UNCLASSIFIED_CHANGES",
+        "score": "PARTIAL"
+      },
+      "dss": {
+        "verdict": "VALID_WITH_ALLOWED_CHANGES",
+        "score": "MISSED"
+      }
+    },
+    "F3": {
+      "pyhanko": {
+        "verdict": "VALID",
+        "score": "INFO"
+      },
+      "pdfsig": {
+        "verdict": "VALID",
+        "score": "INFO"
+      },
+      "dss": {
+        "verdict": "VALID",
+        "score": "INFO"
       }
     }
   }
