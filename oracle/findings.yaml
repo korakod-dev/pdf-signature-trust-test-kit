@@ -1,4 +1,35 @@
 # Review labels for MISSED and PARTIAL results, written after the run that found them.
 # Labels: documented_behavior, possible_bug, oracle_disputed, not_reviewed.
 # Each entry: {case, tool, label, note}. A result with no entry is not_reviewed.
-findings: []
+findings:
+  - case: C1
+    tool: pdfsig
+    label: documented_behavior
+    note: &pdfsig_note >-
+      Reports "Not total document signed" and a valid signature. Its output has no field
+      that classifies a later change, so it reports coverage without judging it.
+  - {case: C2, tool: pdfsig, label: documented_behavior, note: *pdfsig_note}
+  - {case: C3, tool: pdfsig, label: documented_behavior, note: *pdfsig_note}
+  - {case: C4, tool: pdfsig, label: documented_behavior, note: *pdfsig_note}
+  - {case: C5, tool: pdfsig, label: documented_behavior, note: *pdfsig_note}
+  - case: C2
+    tool: dss
+    label: documented_behavior
+    note: >-
+      The object changes are all SignatureOrFormFill. The filled value also gives a
+      visual difference warning, documented at WARN in the default policy. The mapping
+      counts that as an other warning, which is why this is not an allowed change.
+  - case: C3
+    tool: dss
+    label: documented_behavior
+    note: >-
+      TOTAL_PASSED with a DocMDP warning. The default policy documents DocMDP at WARN, so
+      it reports the violation and does not fail the signature. A stricter policy could.
+  - case: C4
+    tool: dss
+    label: documented_behavior
+    note: &dss_changed_note >-
+      TOTAL_PASSED with visual difference and undefined change warnings. The default
+      policy documents both at WARN, so it reports the change and leaves the decision to
+      the reader.
+  - {case: C5, tool: dss, label: documented_behavior, note: *dss_changed_note}
