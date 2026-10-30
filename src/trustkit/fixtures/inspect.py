@@ -42,6 +42,11 @@ def signed_region(data: bytes) -> SignedRegion:
     return SignedRegion(*(int(n) for n in matches[0]))
 
 
+def signed_regions(data: bytes) -> list[SignedRegion]:
+    """Every ByteRange in file order, for cases with more than one signature."""
+    return [SignedRegion(*(int(n) for n in match)) for match in BYTE_RANGE.findall(data)]
+
+
 def _signed_data(data: bytes) -> cms.SignedData:
     region = signed_region(data)
     gap = data[region.start1 + region.length1 : region.start2]

@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ORACLE_DIR = ROOT / "oracle"
 
 MILESTONES = ("M1", "M2", "M3", "M4")
-TOOLS_BY_MILESTONE = {"M1": ("pyhanko", "pdfsig")}
+TOOLS_BY_MILESTONE = {"M1": ("pyhanko", "pdfsig"), "M2": ("pyhanko", "pdfsig", "dss")}
 
 
 @dataclass(frozen=True)
@@ -53,3 +53,9 @@ def cases_for(milestone: str, cases: list[Case] | None = None) -> list[Case]:
 
 def load_mapping(path: Path = ORACLE_DIR / "mapping.yaml") -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def load_findings(path: Path = ORACLE_DIR / "findings.yaml") -> dict[tuple[str, str], dict]:
+    """Review labels, keyed by (case id, tool)."""
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return {(f["case"], f["tool"]): f for f in data["findings"]}

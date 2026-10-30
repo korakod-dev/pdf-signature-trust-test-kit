@@ -1,5 +1,7 @@
 """Renders the results table. Reports behavior per case and version, not a ranking."""
 
+from trustkit.oracle import load_findings
+
 
 def render_markdown(results: dict) -> str:
     tools = sorted({row["tool"] for row in results["observations"]})
@@ -44,7 +46,13 @@ def render_markdown(results: dict) -> str:
         row for row in results["observations"] if row["score"] in ("MISSED", "PARTIAL")
     ]
     if findings:
-        lines += ["", "## Findings to review", ""]
+        labels = load_findings()
+        lines += ["", "## Findings", ""]
         for row in findings:
-            lines.append(f"- {row['case_id']}/{row['tool']}: {row['score']} (not_reviewed)")
+            entry = labels.get((row["case_id"], row["tool"]), {})
+            note = f": {entry['note']}" if entry.get("note") else ""
+            lines.append(
+                f"- {row['case_id']}/{row['tool']}: {row['score']} "
+                f"({entry.get('label', 'not_reviewed')}){note}"
+            )
     return "\n".join(lines) + "\n"

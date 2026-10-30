@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DiagnosticData xmlns="http://dss.esig.europa.eu/validation/diagnostic">
+    <DocumentName>expired.pdf</DocumentName>
+    <ValidationDate>2026-10-30T16:10:43Z</ValidationDate>
+    <Attestations/>
+    <Signatures>
+        <Signature Id="S-5AC1496A0C6B42528FA3CE0EE8CC1D73E527F1CBAE76A31E3C4C3CA5AF484EF2">
+            <SignatureFilename>expired.pdf</SignatureFilename>
+            <ClaimedSigningTime>2026-10-30T16:10:14Z</ClaimedSigningTime>
+            <SignatureFormat>PAdES-BASELINE-B</SignatureFormat>
+            <StructuralValidation valid="true"/>
+            <DigestMatchers>
+                <DigestMatcher type="MESSAGE_DIGEST">
+                    <DigestMethod>SHA256</DigestMethod>
+                    <DigestValue>UbzmHWavBuSQv+ty198g2qezHvGEIEnG2rFwwbuyvTw=</DigestValue>
+                    <DataFound>true</DataFound>
+                    <DataIntact>true</DataIntact>
+                </DigestMatcher>
+            </DigestMatchers>
+            <BasicSignature>
+                <EncryptionAlgoUsedToSignThisToken>RSA</EncryptionAlgoUsedToSignThisToken>
+                <KeyLengthUsedToSignThisToken>2048</KeyLengthUsedToSignThisToken>
+                <DigestAlgoUsedToSignThisToken>SHA256</DigestAlgoUsedToSignThisToken>
+                <SignatureIntact>true</SignatureIntact>
+                <SignatureValid>true</SignatureValid>
+            </BasicSignature>
+            <SigningCertificate Certificate="C-9780F1B88D9E27622E9E370A198522A327552001DA02A6B94EB947164447668D"/>
+            <CertificateChain>
+                <ChainItem Certificate="C-9780F1B88D9E27622E9E370A198522A327552001DA02A6B94EB947164447668D"/>
+                <ChainItem Certificate="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313"/>
+            </CertificateChain>
+            <ContentType>1.2.840.113549.1.7.1</ContentType>
+            <CommitmentTypeIndications/>
+            <SignerInformationStore>
+                <SignerInfo Current="true">
+                    <IssuerName>CN=TEST ONLY Root CA - Not For Production, O=Example Test Org</IssuerName>
+                    <SerialNumber>253307364112457606623209845141785904786370173187</SerialNumber>
+                </SignerInfo>
+            </SignerInformationStore>
+            <PDFRevision>
+                <SignatureField name="Signature1"/>
+                <PDFSignatureDictionary consistent="true">
+                    <Type>Sig</Type>
+                    <Filter>Adobe.PPKLite</Filter>
+                    <SubFilter>ETSI.CAdES.detached</SubFilter>
+                    <SignatureByteRange valid="true">0 2268 9796 505</SignatureByteRange>
+                </PDFSignatureDictionary>
+            </PDFRevision>
+            <SignerDocumentRepresentations HashOnly="false" DocHashOnly="false"/>
+            <FoundCertificates>
+                <RelatedCertificate Certificate="C-9780F1B88D9E27622E9E370A198522A327552001DA02A6B94EB947164447668D">
+                    <Origin>SIGNED_DATA</Origin>
+                    <CertificateRef>
+                        <Origin>SIGNING_CERTIFICATE</Origin>
+                        <IssuerSerial match="true">MGgwUKROMEwxGTAXBgNVBAoMEEV4YW1wbGUgVGVzdCBPcmcxLzAtBgNVBAMMJlRFU1QgT05MWSBSb290IENBIC0gTm90IEZvciBQcm9kdWN0aW9uAhQsXrHu1vZHMzlXt3GJRIfm1BOZAw==</IssuerSerial>
+                        <DigestAlgoAndValue match="true">
+                            <DigestMethod>SHA256</DigestMethod>
+                            <DigestValue>l4DxuI2eJ2IunjcKGYUioydVIAHaAqa5TrlHFkRHZo0=</DigestValue>
+                        </DigestAlgoAndValue>
+                    </CertificateRef>
+                </RelatedCertificate>
+                <RelatedCertificate Certificate="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313">
+                    <Origin>SIGNED_DATA</Origin>
+                </RelatedCertificate>
+            </FoundCertificates>
+            <FoundRevocations/>
+            <FoundTimestamps/>
+            <FoundEvidenceRecords/>
+            <SignatureScopes>
+                <SignatureScope SignerData="D-DDF70F813753D9A6DF0897402C99381E9C5A3AB8EEAFD3524DC2610091B2D143">
+                    <Scope>FULL</Scope>
+                    <Name>Full PDF</Name>
+                    <Description>The document ByteRange : [0, 2268, 9796, 505]</Description>
+                </SignatureScope>
+            </SignatureScopes>
+            <SignatureDigestReference>
+                <DigestMethod>SHA256</DigestMethod>
+                <DigestValue>NCfQQjB9UJhD7aAKYO0EAjryPdDVIj0zDc/jwMnx28A=</DigestValue>
+            </SignatureDigestReference>
+            <DataToBeSignedRepresentation>
+                <DigestMethod>SHA256</DigestMethod>
+                <DigestValue>7BHVNBMj5qjDzTJAZWkNAIeDRBoYZB0UMTiqMgh3fOU=</DigestValue>
+            </DataToBeSignedRepresentation>
+            <SignatureValue>Mri+BTKHNOwZ1R8Ffqyph0P7Y1k9lC1OE7s+AFbfE61+idlbYnx/LeLC5ScVH5kzHevyqGARIEA4N0lqoFUNRI0l++RXyea+ML72HV4HSwJkqatGE4axbcr5KOX1b+y+JC+t1i8ZV0NwvbZ9ln7iIy/vCJ/WozXsDe3Vu6EeLyPWQpWllMBA1ZMVqcbxRsy85unJ8UXz7I30T3/dNAQh5gJ78VJDns6RcQYxIEjjC//jtKuckEMrk4ivb3fiWFCua/7kXLARGq0x07tBSETRX4M19NPq67QkP4LZreVRzk19P63j8yh8hBcq5tmCzUKNexC2h47UPRDK7K0Haif6Bw==</SignatureValue>
+        </Signature>
+    </Signatures>
+    <EvidenceRecords/>
+    <UsedAttestationRevocationTokens/>
+    <UsedCertificates>
+        <Certificate Id="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313">
+            <SubjectDistinguishedName Format="CANONICAL">cn=test only root ca - not for production,o=example test org</SubjectDistinguishedName>
+            <SubjectDistinguishedName Format="RFC2253">CN=TEST ONLY Root CA - Not For Production,O=Example Test Org</SubjectDistinguishedName>
+            <IssuerDistinguishedName Format="CANONICAL">cn=test only root ca - not for production,o=example test org</IssuerDistinguishedName>
+            <IssuerDistinguishedName Format="RFC2253">CN=TEST ONLY Root CA - Not For Production,O=Example Test Org</IssuerDistinguishedName>
+            <SerialNumber>678660966613410578812527132426445580097168679883</SerialNumber>
+            <CommonName>TEST ONLY Root CA - Not For Production</CommonName>
+            <OrganizationName>Example Test Org</OrganizationName>
+            <Sources>
+                <Source>TRUSTED_STORE</Source>
+                <Source>SIGNATURE</Source>
+            </Sources>
+            <NotAfter>2046-12-31T00:00:00Z</NotAfter>
+            <NotBefore>2020-01-01T00:00:00Z</NotBefore>
+            <PublicKeySize>2048</PublicKeySize>
+            <PublicKeyEncryptionAlgo>RSA</PublicKeyEncryptionAlgo>
+            <EntityKey>EK-522FDC7276A5DA9B64D0EF8BA22D23891085097EACAA95DBB1D3030D02005B21</EntityKey>
+            <IssuerEntityKey key="true" subjectName="true">EK-522FDC7276A5DA9B64D0EF8BA22D23891085097EACAA95DBB1D3030D02005B21</IssuerEntityKey>
+            <BasicSignature>
+                <EncryptionAlgoUsedToSignThisToken>RSA</EncryptionAlgoUsedToSignThisToken>
+                <KeyLengthUsedToSignThisToken>2048</KeyLengthUsedToSignThisToken>
+                <DigestAlgoUsedToSignThisToken>SHA256</DigestAlgoUsedToSignThisToken>
+                <SignatureIntact>true</SignatureIntact>
+                <SignatureValid>true</SignatureValid>
+            </BasicSignature>
+            <CertificateChain/>
+            <Trusted>true</Trusted>
+            <SelfSigned>true</SelfSigned>
+            <CertificateExtensions>
+                <SubjectKeyIdentifier OID="2.5.29.14" critical="false">
+                    <ski>/KqUESkDGcXm7J+FVpd4L2VVmtE=</ski>
+                </SubjectKeyIdentifier>
+                <BasicConstraints CA="true" pathLenConstraint="2147483647" OID="2.5.29.19" critical="true"/>
+                <KeyUsages OID="2.5.29.15" critical="true">
+                    <keyUsageBit>keyCertSign</keyUsageBit>
+                    <keyUsageBit>crlSign</keyUsageBit>
+                </KeyUsages>
+            </CertificateExtensions>
+            <TrustServiceProviders/>
+            <DigestAlgoAndValue>
+                <DigestMethod>SHA256</DigestMethod>
+                <DigestValue>QqKdVsGNXn6TTdV5kgbswEG/AB3GJi4umOXuN916sxM=</DigestValue>
+            </DigestAlgoAndValue>
+        </Certificate>
+        <Certificate Id="C-9780F1B88D9E27622E9E370A198522A327552001DA02A6B94EB947164447668D">
+            <SubjectDistinguishedName Format="CANONICAL">cn=test only expired signer - not for production,o=example test org</SubjectDistinguishedName>
+            <SubjectDistinguishedName Format="RFC2253">CN=TEST ONLY Expired Signer - Not For Production,O=Example Test Org</SubjectDistinguishedName>
+            <IssuerDistinguishedName Format="CANONICAL">cn=test only root ca - not for production,o=example test org</IssuerDistinguishedName>
+            <IssuerDistinguishedName Format="RFC2253">CN=TEST ONLY Root CA - Not For Production,O=Example Test Org</IssuerDistinguishedName>
+            <SerialNumber>253307364112457606623209845141785904786370173187</SerialNumber>
+            <CommonName>TEST ONLY Expired Signer - Not For Production</CommonName>
+            <OrganizationName>Example Test Org</OrganizationName>
+            <Sources>
+                <Source>SIGNATURE</Source>
+            </Sources>
+            <NotAfter>2020-12-31T00:00:00Z</NotAfter>
+            <NotBefore>2020-01-01T00:00:00Z</NotBefore>
+            <PublicKeySize>2048</PublicKeySize>
+            <PublicKeyEncryptionAlgo>RSA</PublicKeyEncryptionAlgo>
+            <EntityKey>EK-A3A4442650295EB260126BD7485C68790B9E5C2A6D7159762542FD386FC0D02D</EntityKey>
+            <IssuerEntityKey key="true" subjectName="true">EK-522FDC7276A5DA9B64D0EF8BA22D23891085097EACAA95DBB1D3030D02005B21</IssuerEntityKey>
+            <BasicSignature>
+                <EncryptionAlgoUsedToSignThisToken>RSA</EncryptionAlgoUsedToSignThisToken>
+                <KeyLengthUsedToSignThisToken>2048</KeyLengthUsedToSignThisToken>
+                <DigestAlgoUsedToSignThisToken>SHA256</DigestAlgoUsedToSignThisToken>
+                <SignatureIntact>true</SignatureIntact>
+                <SignatureValid>true</SignatureValid>
+            </BasicSignature>
+            <SigningCertificate Certificate="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313"/>
+            <CertificateChain>
+                <ChainItem Certificate="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313"/>
+            </CertificateChain>
+            <Trusted>false</Trusted>
+            <SelfSigned>false</SelfSigned>
+            <CertificateExtensions>
+                <AuthorityKeyIdentifier OID="2.5.29.35" critical="false">
+                    <keyIdentifier>/KqUESkDGcXm7J+FVpd4L2VVmtE=</keyIdentifier>
+                </AuthorityKeyIdentifier>
+                <SubjectKeyIdentifier OID="2.5.29.14" critical="false">
+                    <ski>1kGYJBkndhlkZIl0Nhxw9LzFdGQ=</ski>
+                </SubjectKeyIdentifier>
+                <BasicConstraints CA="false" OID="2.5.29.19" critical="true"/>
+                <KeyUsages OID="2.5.29.15" critical="true">
+                    <keyUsageBit>digitalSignature</keyUsageBit>
+                    <keyUsageBit>nonRepudiation</keyUsageBit>
+                </KeyUsages>
+                <NoRevAvail present="true" OID="2.5.29.56" critical="false"/>
+            </CertificateExtensions>
+            <TrustServiceProviders/>
+            <DigestAlgoAndValue>
+                <DigestMethod>SHA256</DigestMethod>
+                <DigestValue>l4DxuI2eJ2IunjcKGYUioydVIAHaAqa5TrlHFkRHZo0=</DigestValue>
+            </DigestAlgoAndValue>
+        </Certificate>
+    </UsedCertificates>
+    <UsedRevocations/>
+    <UsedTimestamps/>
+    <OriginalDocuments>
+        <SignerData Id="D-DDF70F813753D9A6DF0897402C99381E9C5A3AB8EEAFD3524DC2610091B2D143">
+            <ReferencedName>Full PDF</ReferencedName>
+            <DigestAlgoAndValue>
+                <DigestMethod>SHA256</DigestMethod>
+                <DigestValue>7UxX1AI/2YppgQyQq7U47+JUz+eXBRtChu90fTvL1hc=</DigestValue>
+            </DigestAlgoAndValue>
+        </SignerData>
+    </OriginalDocuments>
+    <TrustedLists/>
+    <ListsOfTrustedEntities/>
+</DiagnosticData>

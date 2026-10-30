@@ -17,6 +17,17 @@ def _read(built, case_id: str) -> bytes:
     return built[1][case_id].path.read_bytes()
 
 
+def _identities(test_pki: pki.TestPki) -> tuple[pki.Identity, ...]:
+    return (
+        test_pki.root,
+        test_pki.leaf,
+        test_pki.other_root,
+        test_pki.other_leaf,
+        test_pki.second_leaf,
+        test_pki.expired_leaf,
+    )
+
+
 def _subjects(certs: list[x509.Certificate]) -> set[str]:
     return {c.subject.rfc4514_string() for c in certs}
 
@@ -95,14 +106,14 @@ def test_nss_database_holds_only_the_trust_anchor(built, tmp_path):
 
 def test_names_are_obviously_fake(built):
     test_pki, _, _ = built
-    for identity in (test_pki.root, test_pki.leaf, test_pki.other_root, test_pki.other_leaf):
+    for identity in _identities(test_pki):
         subject = identity.cert.subject.rfc4514_string()
         assert "TEST ONLY" in subject and "Example Test Org" in subject
 
 
 def test_certificates_contain_no_urls(built):
     test_pki, _, _ = built
-    for identity in (test_pki.root, test_pki.leaf, test_pki.other_root, test_pki.other_leaf):
+    for identity in _identities(test_pki):
         for extension in identity.cert.extensions:
             assert not isinstance(
                 extension.value,
@@ -127,3 +138,116 @@ def test_fixture_and_certificate_output_holds_no_key_material(built):
     assert scan.scan_directory(base / "fixtures") == []
     assert scan.scan_directory(base / "certs") == []
 
+
+def _assert_later_update(built, case_id: str) -> tuple[bytes, bytes]:
+    """The signed revision is unchanged, and later bytes exist. Returns both parts."""
+    fixture = built[1][case_id]
+    data = fixture.path.read_bytes()
+    revision = fixture.signed_revision
+    assert revision is not None and data.startswith(revision) and len(data) > len(revision)
+    first = inspect.signed_regions(revision)[0]
+    assert first.start2 + first.length2 == len(revision)
+    assert inspect.digest_matches(revision)
+    return revision, data[len(revision) :]
+
+
+def test_leaves_declare_no_revocation_data_and_the_root_does_not(built):
+    test_pki, _, _ = built
+    for identity in (
+        test_pki.leaf,
+        test_pki.other_leaf,
+        test_pki.second_leaf,
+        test_pki.expired_leaf,
+    ):
+        extension = identity.cert.extensions.get_extension_for_oid(pki.NO_REV_AVAIL)
+        assert extension.value.value == pki.ASN1_NULL and not extension.critical
+    assert pki.NO_REV_AVAIL not in [e.oid for e in test_pki.root.cert.extensions]
+
+
+def test_n1_has_no_signature(built):
+    data = _read(built, "N1")
+    assert inspect.signed_regions(data) == []
+    assert b"/Sig" not in data
+
+
+def test_b2_certificate_ended_by_2021_and_chains_to_the_anchor(built):
+    test_pki, built_fixtures, _ = built
+    cert = test_pki.expired_leaf.cert
+    assert cert.not_valid_after_utc.year < 2021
+    cert.verify_directly_issued_by(test_pki.root.cert)
+    assert built_fixtures["B2"].trust_anchor is test_pki.root
+    data = _read(built, "B2")
+    assert inspect.digest_matches(data)
+    inspect.verify_signed_attributes(data, cert)
+
+
+def test_b2_has_no_timestamp(built):
+    assert b"/DocTimeStamp" not in _read(built, "B2")
+
+
+def test_c1_appends_a_second_signature_covering_the_whole_file(built):
+    revision, later = _assert_later_update(built, "C1")
+    data = revision + later
+    regions = inspect.signed_regions(data)
+    assert len(regions) == 2
+    assert regions[1].start2 + regions[1].length2 == len(data)
+    assert b"/Signature2" in later or b"(Signature2)" in later
+
+
+def test_c1_second_signer_chains_to_the_anchor(built):
+    test_pki, _, _ = built
+    test_pki.second_leaf.cert.verify_directly_issued_by(test_pki.root.cert)
+    assert test_pki.second_leaf.cert.subject != test_pki.leaf.cert.subject
+
+
+def test_c2_certifies_at_level_2_and_only_later_bytes_hold_the_value(built):
+    revision, later = _assert_later_update(built, "C2")
+    assert re.search(rb"/P\s+2\b", revision)
+    assert b"/DocMDP" in revision
+    assert fixtures.FORM_FIELD_VALUE.encode() not in revision
+    assert fixtures.FORM_FIELD_VALUE.encode() in later
+
+
+def test_c3_certifies_at_level_1_and_later_bytes_add_an_annotation(built):
+    revision, later = _assert_later_update(built, "C3")
+    assert re.search(rb"/P\s+1\b", revision)
+    assert b"/DocMDP" in revision
+    assert b"/Subtype /Text" in later
+
+
+def test_c4_has_no_docmdp_and_later_bytes_change_the_amount(built):
+    revision, later = _assert_later_update(built, "C4")
+    assert b"/DocMDP" not in revision + later
+    assert fixtures.AMOUNT_TEXT in revision
+    assert fixtures.CHANGED_AMOUNT_TEXT not in revision
+    assert fixtures.CHANGED_AMOUNT_TEXT in later
+
+
+def test_c5_changed_amount_is_already_signed_and_later_bytes_add_no_page_content(built):
+    revision, later = _assert_later_update(built, "C5")
+    assert fixtures.AMOUNT_TEXT in revision
+    assert fixtures.CHANGED_AMOUNT_TEXT in revision
+    assert revision.index(fixtures.CHANGED_AMOUNT_TEXT) < revision.index(fixtures.AMOUNT_TEXT)
+    assert b"1 1 1 rg" in revision
+    assert b"/DocMDP" not in revision + later
+    assert fixtures.CHANGED_AMOUNT_TEXT not in later
+    assert b"BT " not in later
+
+
+def test_c5_new_page_lists_one_content_stream_and_the_signed_page_lists_two(built):
+    revision, later = _assert_later_update(built, "C5")
+    assert re.search(rb"/Contents\s*\[\s*\d+ 0 R\s+\d+ 0 R\s*\]", revision)
+    assert re.search(rb"/Contents\s+\d+ 0 R", later)
+
+
+def test_every_active_case_has_a_fixture(built):
+    from trustkit.oracle import cases_for
+
+    assert {c.id for c in cases_for("M2")} == set(built[1])
+
+
+def test_every_active_case_has_rationale_and_basis():
+    from trustkit.oracle import cases_for
+
+    for case in cases_for("M2"):
+        assert case.rationale.strip() and case.basis in ("crypto", "spec", "policy")

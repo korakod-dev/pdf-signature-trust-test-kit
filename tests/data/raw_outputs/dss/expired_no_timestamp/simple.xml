@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T16:10:43Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>expired.pdf</DocumentName>
+    <ValidSignaturesCount>0</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-B" Id="S-5AC1496A0C6B42528FA3CE0EE8CC1D73E527F1CBAE76A31E3C4C3CA5AF484EF2">
+        <CertificateChain>
+            <Certificate Id="C-9780F1B88D9E27622E9E370A198522A327552001DA02A6B94EB947164447668D">
+                <QualifiedName>TEST ONLY Expired Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>INDETERMINATE</Indication>
+        <SubIndication>OUT_OF_BOUNDS_NOT_REVOKED</SubIndication>
+        <AdESValidationDetails>
+            <Error Key="BBB_XCV_SUB_ANS">The certificate validation is not conclusive!</Error>
+            <Error Key="BBB_XCV_ICTIVRSC_ANS">The current time is not in the validity range of the signer's certificate!</Error>
+            <Error Key="BBB_SAV_ISQPSTWSCVR_ANS">The signed qualifying property: 'signing-time' is not within the signing-certificate's validity range!</Error>
+            <Error Key="TSV_IBSTBCEC_ANS">The best-signature-time is not before the expiration date of the signing certificate!</Error>
+            <Error Key="ARCH_LTAIVMP_ANS">No long term availability and integrity of validation material is present!</Error>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+            <Info Key="BBB_XCV_IRDCSFC_ANS">The revocation data check has been skipped for the certificate!</Info>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+            <Warning Key="QUAL_IS_ADES_IND">The signature/seal is an INDETERMINATE AdES digital signature!</Warning>
+        </QualificationDetails>
+        <SigningTime>2026-10-30T16:10:14Z</SigningTime>
+        <BestSignatureTime>2026-10-30T16:10:43Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Expired Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-DDF70F813753D9A6DF0897402C99381E9C5A3AB8EEAFD3524DC2610091B2D143" name="Full PDF" scope="FULL">The document ByteRange : [0, 2268, 9796, 505]</SignatureScope>
+    </Signature>
+</SimpleReport>

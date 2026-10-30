@@ -6,6 +6,7 @@ seen from the installed tool version, so they only test the parser.
 
 import pytest
 
+from trustkit.adapters.dss_adapter import parse_reports
 from trustkit.adapters.pdfsig_adapter import parse_report
 from trustkit.adapters.pyhanko_adapter import map_signals
 
@@ -30,6 +31,8 @@ def _pdfsig(name: str) -> tuple[str, int]:
         ("no_signatures", "NO_SIGNATURE", False),
         ("unreadable_file", "TOOL_ERROR", False),
         ("no_ocsp_generic_cert_error", "TOOL_ERROR", True),
+        ("certificate_expired", "INDETERMINATE", False),
+        ("second_signature", "VALID_WITH_UNCLASSIFIED_CHANGES", False),
     ],
 )
 def test_pdfsig_captures(mapping, name, verdict, unmapped):
@@ -48,6 +51,8 @@ def test_pdfsig_captures_are_all_exercised():
         "no_signatures",
         "unreadable_file",
         "no_ocsp_generic_cert_error",
+        "certificate_expired",
+        "second_signature",
     }
     assert {p.stem for p in PDFSIG.glob("*.stdout")} == parametrized
 
@@ -57,7 +62,6 @@ def test_pdfsig_captures_are_all_exercised():
     [
         ("Signature Validation: Signature is Invalid.", "INVALID"),
         ("Certificate Validation: Certificate has been Revoked.", "INVALID"),
-        ("Certificate Validation: Certificate has Expired", "INDETERMINATE"),
     ],
 )
 def test_pdfsig_synthetic_lines_not_yet_observed(mapping, line, verdict):
@@ -170,3 +174,87 @@ def test_pyhanko_trailing_bytes_stay_unmapped(mapping):
 def test_pyhanko_rules_on_modified_captures(mapping, change, verdict):
     signals = {**load_capture("pyhanko", "valid_whole_file"), **change}
     assert map_signals(signals, mapping)[0] == verdict
+
+
+DSS = RAW_OUTPUTS / "dss"
+
+
+def _dss(name: str) -> tuple[str, str]:
+    return (DSS / name / "simple.xml").read_text(), (DSS / name / "diagnostic.xml").read_text()
+
+
+DSS_CAPTURES = [
+    ("valid_whole_file", "VALID", None, []),
+    ("one_byte_changed", "INVALID", "HASH_FAILURE", []),
+    ("unknown_root", "INDETERMINATE", "NO_CERTIFICATE_CHAIN_FOUND", []),
+    ("expired_no_timestamp", "INDETERMINATE", "OUT_OF_BOUNDS_NOT_REVOKED", []),
+    ("second_signature", "VALID_WITH_ALLOWED_CHANGES", None, ["SignatureOrFormFill"]),
+    (
+        "docmdp2_form_fill",
+        "VALID_WITH_UNCLASSIFIED_CHANGES",
+        None,
+        ["SignatureOrFormFill", "VisualDifference"],
+    ),
+    ("docmdp1_annotation", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["AnnotationChange"]),
+    ("content_replaced", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["Undefined", "VisualDifference"]),
+    ("overlay_removed", "VALID_WITH_UNCLASSIFIED_CHANGES", None, ["Undefined", "VisualDifference"]),
+]
+
+
+@pytest.mark.parametrize("name, verdict, sub_indication, modifications", DSS_CAPTURES)
+def test_dss_captures(mapping, name, verdict, sub_indication, modifications):
+    got, unmapped, _, signals = parse_reports(*_dss(name), mapping)
+    assert (got, unmapped) == (verdict, False)
+    assert signals["sub_indication"] == sub_indication
+    assert signals["modifications"] == modifications
+
+
+def test_dss_captures_are_all_exercised():
+    parametrized = {capture[0] for capture in DSS_CAPTURES} | {"no_signatures"}
+    assert {p.name for p in DSS.iterdir() if p.is_dir()} == parametrized
+
+
+def test_dss_no_signatures(mapping):
+    assert parse_reports(*_dss("no_signatures"), mapping)[:2] == ("NO_SIGNATURE", False)
+
+
+def test_dss_judges_the_first_signature(mapping):
+    signals = parse_reports(*_dss("second_signature"), mapping)[3]
+    assert signals["signature_count"] == 2
+    assert signals["signer_subject"] == "TEST ONLY Signer - Not For Production"
+
+
+def test_dss_a_good_chain_without_no_rev_avail_would_be_indeterminate(mapping):
+    # Rewritten from a capture. See "Certificates declare that no revocation data exists".
+    simple, diagnostic = _dss("valid_whole_file")
+    simple = simple.replace(
+        "<Indication>TOTAL_PASSED</Indication>",
+        "<Indication>INDETERMINATE</Indication>"
+        "<SubIndication>CERTIFICATE_CHAIN_GENERAL_FAILURE</SubIndication>",
+    )
+    verdict, unmapped, _, signals = parse_reports(simple, diagnostic, mapping)
+    assert (verdict, unmapped) == ("INDETERMINATE", False)
+    assert signals["sub_indication"] == "CERTIFICATE_CHAIN_GENERAL_FAILURE"
+
+
+@pytest.mark.parametrize(
+    "name, old, new",
+    [
+        ("valid_whole_file", "<Indication>TOTAL_PASSED<", "<Indication>TOTAL-PASSED<"),
+        ("valid_whole_file", "BBB_XCV_AIA_PRES_ANS", "BBB_SOMETHING_NEW"),
+        ("second_signature", "<SignatureOrFormFill ", "<SomethingNew "),
+    ],
+)
+def test_dss_unknown_output_never_defaults_to_a_verdict(mapping, name, old, new):
+    simple, diagnostic = _dss(name)
+    assert old in simple or old in diagnostic
+    closing = old.replace("<", "</").strip()
+    simple, diagnostic = simple.replace(old, new), diagnostic.replace(old, new)
+    if "SomethingNew" in new:
+        diagnostic = diagnostic.replace(closing + ">", new.replace("<", "</").strip() + ">")
+    verdict, unmapped, rule, _ = parse_reports(simple, diagnostic, mapping)
+    assert (verdict, unmapped, rule) == ("TOOL_ERROR", True, None)
+
+
+def test_dss_annotation_only_is_not_reported_as_allowed(mapping):
+    assert parse_reports(*_dss("docmdp1_annotation"), mapping)[2] == "passed-other-modifications"

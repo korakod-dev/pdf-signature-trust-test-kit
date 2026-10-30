@@ -1,0 +1,4 @@
+# Review labels for MISSED and PARTIAL results, written after the run that found them.
+# Labels: documented_behavior, possible_bug, oracle_disputed, not_reviewed.
+# Each entry: {case, tool, label, note}. A result with no entry is not_reviewed.
+findings: []

@@ -11,9 +11,10 @@ import tempfile
 from pathlib import Path
 
 from trustkit import fixtures, gates, pki, report, scan
+from trustkit.adapters.dss_adapter import DssAdapter
 from trustkit.adapters.pdfsig_adapter import PdfsigAdapter
 from trustkit.adapters.pyhanko_adapter import PyHankoAdapter
-from trustkit.oracle import ROOT, cases_for, load_mapping
+from trustkit.oracle import ROOT, TOOLS_BY_MILESTONE, cases_for, load_mapping
 from trustkit.score import score
 
 DEFAULT_BASELINE = ROOT / "baselines" / "baseline.json"
@@ -39,7 +40,8 @@ def current_commit() -> str:
 
 def run_cases(milestone: str, out_dir: Path) -> dict:
     mapping = load_mapping()
-    adapters = [PyHankoAdapter(mapping), PdfsigAdapter(mapping)]
+    available = [PyHankoAdapter(mapping), PdfsigAdapter(mapping), DssAdapter(mapping)]
+    adapters = [a for a in available if a.name in TOOLS_BY_MILESTONE[milestone]]
     cases = cases_for(milestone)
     fixtures_dir = out_dir / "fixtures"
     certs_dir = out_dir / "certs"
@@ -52,7 +54,7 @@ def run_cases(milestone: str, out_dir: Path) -> dict:
         prefix="trustkit-work-"
     ) as work:
         test_pki = pki.generate(certs_dir, Path(keys))
-        built = fixtures.build_m1(fixtures_dir, test_pki)
+        built = fixtures.BUILDERS[milestone](fixtures_dir, test_pki)
         for case in cases:
             fixture = built[case.id]
             for adapter in adapters:
@@ -137,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
 
     run = commands.add_parser("run", help="generate fixtures and run the validators")
-    run.add_argument("--milestone", default="M1", choices=["M1"])
+    run.add_argument("--milestone", default="M2", choices=sorted(TOOLS_BY_MILESTONE))
     run.add_argument("--out", type=Path, default=ROOT / "out")
     run.add_argument("--require-network-isolation", action="store_true")
     run.set_defaults(func=command_run)

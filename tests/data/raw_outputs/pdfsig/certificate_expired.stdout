@@ -1,0 +1,12 @@
+Digital Signature Info of: pdf/expired.pdf
+Signature #1:
+  - Signature Field Name: Signature1
+  - Signer Certificate Common Name: TEST ONLY Expired Signer - Not For Production
+  - Signer full Distinguished Name: CN=TEST ONLY Expired Signer - Not For Production,O=Example Test Org
+  - Signing Time: Oct 30 2026 16:10:14
+  - Signing Hash Algorithm: SHA-256
+  - Signature Type: ETSI.CAdES.detached
+  - Signed Ranges: [0 - 2268], [9796 - 10301]
+  - Total document signed
+  - Signature Validation: Signature is Valid.
+  - Certificate Validation: Certificate has Expired

@@ -17,10 +17,10 @@ def mapping() -> dict:
 
 @pytest.fixture(scope="session")
 def built(tmp_path_factory):
-    """M1 fixtures and PKI. Keys stay in a pytest temp directory outside the repo."""
-    base = tmp_path_factory.mktemp("m1")
+    """All fixtures and the PKI. Keys stay in a pytest temp directory outside the repo."""
+    base = tmp_path_factory.mktemp("fixtures")
     test_pki = pki.generate(base / "certs", base / "keys")
-    return test_pki, fixtures.build_m1(base / "fixtures", test_pki), base
+    return test_pki, fixtures.build_m2(base / "fixtures", test_pki), base
 
 
 @pytest.fixture

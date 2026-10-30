@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T16:10:41Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>untrusted.pdf</DocumentName>
+    <ValidSignaturesCount>0</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-B" Id="S-EA3C4C35563952489D2112F627B943574220DBA4B982426E87E38AE30B3EA1F1">
+        <CertificateChain>
+            <Certificate Id="C-50AEEBBC1C222837D7F055112869CDC2FC94FC91836E4F4A13522B14FE717CE3">
+                <QualifiedName>TEST ONLY Untrusted Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-306F1C11B1067E8D9EFC03AC3F00041B0D40541BCF620A58FF7AA6EFA69CAC7D">
+                <QualifiedName>TEST ONLY Untrusted Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>INDETERMINATE</Indication>
+        <SubIndication>NO_CERTIFICATE_CHAIN_FOUND</SubIndication>
+        <AdESValidationDetails>
+            <Error Key="BBB_XCV_CCCBB_SIG_ANS">The certificate chain for signature is not trusted, it does not contain a trust anchor.</Error>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+            <Warning Key="QUAL_IS_ADES_IND">The signature/seal is an INDETERMINATE AdES digital signature!</Warning>
+        </QualificationDetails>
+        <SigningTime>2026-10-30T16:10:14Z</SigningTime>
+        <BestSignatureTime>2026-10-30T16:10:41Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Untrusted Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-DDF70F813753D9A6DF0897402C99381E9C5A3AB8EEAFD3524DC2610091B2D143" name="Full PDF" scope="FULL">The document ByteRange : [0, 2268, 9952, 506]</SignatureScope>
+    </Signature>
+</SimpleReport>

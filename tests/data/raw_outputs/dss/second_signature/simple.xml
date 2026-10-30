@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SimpleReport ValidationTime="2026-10-30T16:10:46Z" xmlns="http://dss.esig.europa.eu/validation/simple-report">
+    <ValidationPolicy>
+        <PolicyName>QES AES/QC AES TL based</PolicyName>
+        <PolicyDescription>Validates electronic signatures and indicates whether they are advanced electronic signatures (AES), AES supported by a qualified certificate (AES/QC) or a
+		qualified electronic signature (QES). All certificates and their related chains supporting the signatures are validated against the EU Member State Trusted Lists (this includes
+		signer's certificate and certificates used to validate certificate validity status services - CRLs, OCSP, and time-stamps).
+	</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>second.pdf</DocumentName>
+    <ValidSignaturesCount>2</ValidSignaturesCount>
+    <SignaturesCount>2</SignaturesCount>
+    <Signature SignatureFormat="PAdES-BASELINE-B" Id="S-87D17C1B4BEB51184094D9CD2B5E520EB869BDB6D5DDE299F5C65C7E1E6429">
+        <CertificateChain>
+            <Certificate Id="C-B73CA889E176059A51509DBD469D91352FFC08A42F408A41FA0527A8DCC49D2E">
+                <QualifiedName>TEST ONLY Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>TOTAL_PASSED</Indication>
+        <AdESValidationDetails>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+            <Info Key="BBB_XCV_IRDCSFC_ANS">The revocation data check has been skipped for the certificate!</Info>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+        </QualificationDetails>
+        <ExtensionPeriodMax>2046-12-31T00:00:00Z</ExtensionPeriodMax>
+        <SigningTime>2026-10-30T16:10:14Z</SigningTime>
+        <BestSignatureTime>2026-10-30T16:10:46Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-147AEF3EE6FF95C6DDE21FC4568404097346D4DEDAE2B27442961DEAD078B203" name="Partial PDF" scope="PARTIAL">The document ByteRange : [0, 2268, 9772, 505]</SignatureScope>
+    </Signature>
+    <Signature SignatureFormat="PAdES-BASELINE-B" Id="S-9AA28FBBB761386FCD3C150BFDE80D942D5E5026B8F4FD22075E94B2F9059534">
+        <CertificateChain>
+            <Certificate Id="C-822FC533346190E71DDF4FE53F35E0A5304334CF1F8F3B63CA70871C8FC33A49">
+                <QualifiedName>TEST ONLY Second Signer - Not For Production</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-42A29D56C18D5E7E934DD5799206ECC041BF001DC6262E2E98E5EE37DD7AB313" trusted="true">
+                <QualifiedName>TEST ONLY Root CA - Not For Production</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>TOTAL_PASSED</Indication>
+        <AdESValidationDetails>
+            <Warning Key="BBB_XCV_AIA_PRES_ANS">The authority info access is not present!</Warning>
+            <Info Key="BBB_XCV_IRDCSFC_ANS">The revocation data check has been skipped for the certificate!</Info>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+        </QualificationDetails>
+        <ExtensionPeriodMax>2046-12-31T00:00:00Z</ExtensionPeriodMax>
+        <SigningTime>2026-10-30T16:10:15Z</SigningTime>
+        <BestSignatureTime>2026-10-30T16:10:46Z</BestSignatureTime>
+        <SignedBy>TEST ONLY Second Signer - Not For Production</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-FF726391A7C4F643597AE885F8AF9370252C4AAC907C229F2C9BF147915A8761" name="Full PDF" scope="FULL">The document ByteRange : [0, 11018, 18544, 496]</SignatureScope>
+    </Signature>
+</SimpleReport>

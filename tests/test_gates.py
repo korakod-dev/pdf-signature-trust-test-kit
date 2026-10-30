@@ -5,6 +5,7 @@ import subprocess
 
 from trustkit import cli, gates, scan
 from trustkit.adapters.pdfsig_adapter import parse_report
+from trustkit.oracle import load_findings
 
 from .conftest import RAW_OUTPUTS
 
@@ -156,3 +157,20 @@ def test_gate5_directory_scan_catches_artifacts(tmp_path):
 
 def test_this_repository_passes_gate5():
     assert scan.scan_tracked(cli.ROOT) == []
+
+
+def test_gate2_fails_at_m2_when_dss_is_missing(clean_results):
+    clean_results["milestone"] = "M2"
+    failures = gates.check_completeness(clean_results)
+    assert "gate 2: tool dss is missing or has no version" in failures
+    assert any(f.startswith("gate 2: case C5 was not run") for f in failures)
+
+
+def test_every_finding_in_the_baseline_has_a_review_label():
+    baseline = json.loads(cli.DEFAULT_BASELINE.read_text())
+    labels = load_findings()
+    allowed = {"documented_behavior", "possible_bug", "oracle_disputed"}
+    for case_id, tools in baseline["results"].items():
+        for tool, entry in tools.items():
+            if entry["score"] in ("MISSED", "PARTIAL"):
+                assert labels[(case_id, tool)]["label"] in allowed, (case_id, tool)
