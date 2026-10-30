@@ -33,3 +33,30 @@ findings:
       policy documents both at WARN, so it reports the change and leaves the decision to
       the reader.
   - {case: C5, tool: dss, label: documented_behavior, note: *dss_changed_note}
+  - case: A3
+    tool: pdfsig
+    label: documented_behavior
+    note: >-
+      Reports "Not total document signed" and a valid signature, which is accurate for a
+      gap wider than /Contents. It does not say the signature structure is nonstandard.
+  - case: B5
+    tool: pyhanko
+    label: documented_behavior
+    note: >-
+      ValidationContext defaults to revocation_mode soft-fail, so an unreachable source
+      does not change the result. The kit keeps that default. This is the API default,
+      and the CLI has its own revocation options, which were not run.
+  - case: E2
+    tool: pdfsig
+    label: documented_behavior
+    note: >-
+      Its output has no field for a signature timestamp, so an untrusted timestamp cannot
+      change the result.
+  - case: E2
+    tool: dss
+    label: oracle_disputed
+    note: >-
+      TOTAL_PASSED, and the timestamp is reported separately as INDETERMINATE,
+      NO_CERTIFICATE_CHAIN_FOUND. DSS does not use it as proof of time, and the signature
+      stands at the validation time. The oracle's policy says offered but unproven evidence
+      is insufficient. The expected value is unchanged, and this is for the owner to decide.
