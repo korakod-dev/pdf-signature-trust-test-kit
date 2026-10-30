@@ -104,3 +104,22 @@ behavior was largely visible. See "How far the M2 samples go" in
    Baseline:
    [`3809954`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/3809954),
    which changes [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
+
+### M3
+
+The expected verdicts for A3, B3, B4, B5, D1, E1 and E2 are also in `79b32c8`, and have
+not changed since. As in M2, the tools first ran on samples from the same recipes. See
+"How far the M3 samples go" in [`docs/decisions.md`](docs/decisions.md).
+
+1. Mapping: [`e745386`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/e745386).
+2. Fixtures, revocation service and tests:
+   [`7cc2844`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/7cc2844).
+3. First real run:
+   [CI run 41140005501](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41140005501)
+   on `7cc2844`, red at gate 2 (B5 on pdfsig not yet recorded) and gate 4 (baseline still
+   for M2).
+4. Review labels:
+   [`8663307`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/8663307).
+   Baseline:
+   [`badf75a`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/badf75a),
+   which changes [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
