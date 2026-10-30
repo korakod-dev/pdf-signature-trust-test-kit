@@ -1,0 +1,17 @@
+{
+  "intact": true,
+  "valid": true,
+  "trusted": false,
+  "revoked": false,
+  "docmdp_ok": true,
+  "bottom_line": false,
+  "coverage": "ENTIRE_FILE",
+  "coverage_summary": "UNTOUCHED",
+  "modification_level": "NONE",
+  "timestamp_present": false,
+  "timestamp_trusted": null,
+  "trust_problem_indic": "AdESIndeterminate.NO_CERTIFICATE_CHAIN_FOUND",
+  "summary": "INTACT:UNTRUSTED,UNTOUCHED",
+  "signer_subject": "Organization: Sampling Throwaway, Common Name: SAMPLE Other Leaf",
+  "signer_subject_shown": true
+}

@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      # Exact versions on purpose. A replaced package turns this step red, so a tool
+      # never changes silently. See docs/decisions.md.
+      - name: Install validators
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            poppler-utils=24.02.0-1ubuntu9.11 \
+            libnss3-tools=2:3.98-1ubuntu0.3
+
+      - name: Install locked Python dependencies
+        run: |
+          python -m pip install -q uv==0.13.6
+          uv sync --locked
+
+      - name: Gate 5, key material in tracked files
+        run: uv run --locked trustkit scan
+
+      - name: Gate 1, fixture, mapping, scoring and gate tests
+        run: uv run --locked pytest -q
+
+      # The whole run happens in a network namespace with no route. --require-network-isolation
+      # refuses to start otherwise.
+      - name: Run validators with no network
+        run: |
+          sudo unshare --net -- setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
+            env "PATH=$PATH" "HOME=$HOME" "GITHUB_SHA=$GITHUB_SHA" \
+            "$GITHUB_WORKSPACE/.venv/bin/trustkit" run \
+              --milestone M1 --out out --require-network-isolation
+
+      - name: Publish results to the job summary
+        if: always()
+        run: cat out/results.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Gates 2, 3 and 4
+        run: uv run --locked trustkit check --results out/results.json
+
+      - name: Gate 5, key material in the artifact
+        if: always()
+        run: uv run --locked trustkit scan --directory out
+
+      - name: Upload results and fixtures (no keys)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30

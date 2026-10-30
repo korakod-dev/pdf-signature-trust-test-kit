@@ -1,0 +1,17 @@
+{
+  "intact": true,
+  "valid": true,
+  "trusted": true,
+  "revoked": false,
+  "docmdp_ok": true,
+  "bottom_line": true,
+  "coverage": "ENTIRE_FILE",
+  "coverage_summary": "UNTOUCHED",
+  "modification_level": "NONE",
+  "timestamp_present": false,
+  "timestamp_trusted": null,
+  "trust_problem_indic": null,
+  "summary": "INTACT:TRUSTED,UNTOUCHED",
+  "signer_subject": "Organization: Sampling Throwaway, Common Name: SAMPLE Leaf",
+  "signer_subject_shown": true
+}

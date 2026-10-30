@@ -1,0 +1,31 @@
+[project]
+name = "trustkit"
+version = "0.1.0"
+description = "Regression kit for PDF signature validators, using synthetic fixtures and a pre-registered oracle"
+readme = "README.md"
+requires-python = "==3.12.*"
+dependencies = [
+    "asn1crypto==1.5.1",
+    "cryptography==50.0.2",
+    "pyHanko==0.38.0",
+    "pyhanko-certvalidator==0.33.0",
+    "pyhanko-cli==0.6.0",
+    "PyYAML==6.0.3",
+    "reportlab==5.1.0",
+]
+
+[project.scripts]
+trustkit = "trustkit.cli:main"
+
+[dependency-groups]
+dev = ["pytest==9.2.0"]
+
+[build-system]
+requires = ["hatchling==1.31.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trustkit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
