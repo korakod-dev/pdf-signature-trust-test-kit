@@ -60,3 +60,5 @@ findings:
       NO_CERTIFICATE_CHAIN_FOUND. DSS does not use it as proof of time, and the signature
       stands at the validation time. The oracle's policy says offered but unproven evidence
       is insufficient. The expected value is unchanged, and this is for the owner to decide.
+  - {case: F2, tool: pdfsig, label: documented_behavior, note: *pdfsig_note}
+  - {case: F2, tool: dss, label: possible_bug}
