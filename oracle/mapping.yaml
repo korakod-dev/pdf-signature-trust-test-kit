@@ -3,10 +3,10 @@
 # Rules are ordered and the first match wins. Output that matches no rule is
 # TOOL_ERROR and fails gate 3. It never defaults to another verdict.
 #
-# Status: confirmed against pyHanko 0.38.0 and pdfsig 24.02.0 output from an
-# unrelated throw-away PDF. Still before the first real run. See
+# Status: pyHanko and pdfsig used on real fixtures since M1. DSS confirmed against
+# DSS 6.5.1 output from throw-away PDFs, before its first real run. See
 # docs/decisions.md for what changed from the initial mapping and why.
-version: 2
+version: 3
 
 pyhanko:
   # Evaluated against the fields of the status object from
@@ -83,11 +83,32 @@ pdfsig:
     "Not total document signed": VALID_WITH_UNCLASSIFIED_CHANGES
 
 dss:
-  # Milestone M2. Unmodified default policy for the main results.
+  # Unmodified default policy for the main results. The report writes the
+  # indications with an underscore (TOTAL_PASSED), not with a hyphen. A report is
+  # judged on its first signature, the one whose ByteRange ends earliest.
+  no_signatures: NO_SIGNATURE
   indications:
-    TOTAL-FAILED: INVALID
+    TOTAL_FAILED: INVALID
     INDETERMINATE: INDETERMINATE
-  total_passed:
-    no_modification_warnings: VALID
-    only_signature_or_form_fill_modifications: VALID_WITH_ALLOWED_CHANGES
-    other_modification_warnings: VALID_WITH_UNCLASSIFIED_CHANGES
+    TOTAL_PASSED: inspect_modifications
+  # Children of ModificationDetection and ObjectModifications in the diagnostic
+  # data, names confirmed in DiagnosticData.xsd. Any other name is unmapped.
+  allowed_modifications:
+    - SignatureOrFormFill
+  other_modifications:
+    - ExtensionChange
+    - AnnotationChange
+    - Undefined
+    - AnnotationOverlap
+    - VisualDifference
+    - PageDifference
+  # Message keys in the simple report, for a TOTAL_PASSED signature. Any other key
+  # is unmapped, and any Error key is unmapped.
+  modification_warnings:
+    - BBB_FC_IVDBSFR_ANS  # visual difference on a page
+    - BBB_FC_ISVADMDPD_ANS  # DocMDP
+    - BBB_FC_DSCNUOM_ANS  # undefined object modifications
+  informational_messages:
+    - BBB_XCV_AIA_PRES_ANS  # no authority info access in the certificate
+    - BBB_XCV_REVOC_PRES_ANS  # no revocation info access in the certificate
+    - BBB_XCV_IRDCSFC_ANS  # revocation check skipped because of noRevAvail

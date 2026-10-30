@@ -14,7 +14,9 @@ must be checked before any publication.
 - [SignerPHP/pdf-signing-qualification, issue 7](https://github.com/SignerPHP/pdf-signing-qualification/issues/7)
   (MIT): planned independent validator adapters.
 - [pdf-insecurity.org](https://pdf-insecurity.org/) and the NDSS 2021 paper "Shadow
-  Attacks: Hiding and Replacing Content in Signed PDFs". The kit's case C5 (from M2)
-  will be written from the published description, with credit to the researchers.
+  Attacks: Hiding and Replacing Content in Signed PDFs". The kit's case C5 is written
+  from the description of the Hide class on that site, with credit to the researchers.
+  Author names are not listed on the pages read, and must be added from the paper
+  before any publication.
   Their exploit files and the `pdf-insecurity/pdf-attacker` repository are not used,
   because no license was found for them.

@@ -82,6 +82,66 @@ travels inside the file is not treated as a trust anchor.
   exposes it as the derived signal `coverage_summary`.
 - `ValidationContext(allow_fetching=False)` is the default, confirmed in source.
 
+### pdfsig: `Certificate has Expired` is now observed
+
+Seen on 24.02.0 on a throw-away PDF during M2, with exit 0. It is no longer synthetic.
+
+### DSS
+
+Checked on DSS 6.5.1 with throw-away PDFs.
+
+- The report writes `TOTAL_PASSED` and `TOTAL_FAILED`, with an underscore.
+- The default policy is named "QES AES/QC AES TL based". It is used unmodified.
+- `dss-cms-object` must be on the class path. `dss-policy-jaxb` supplies the default
+  policy.
+- Modification categories are in the diagnostic data, under `PDFRevision`,
+  `ModificationDetection` and `ObjectModifications`. Names are confirmed in
+  `DiagnosticData.xsd`.
+- The documentation shows a validation time only for `RevocationDataVerifierFactory`.
+  A setter on the document validator is not confirmed, and M2 does not need one.
+
+## Certificates declare that no revocation data exists
+
+**The default DSS policy rejects a signer with no revocation data.** A sample with
+a good chain, and no revocation source, came back `INDETERMINATE` /
+`CERTIFICATE_CHAIN_GENERAL_FAILURE`. Under that result every case except the
+hash-failure and no-chain ones looks the same, so no modification result can be
+observed, and no `TOTAL_PASSED` rule can be proven.
+
+Options considered:
+
+1. Keep the certificates as they were and report `INDETERMINATE` throughout. Honest,
+   but it says nothing about the C group. Rejected.
+2. Relax the DSS policy. The brief allows only stricter policies as separately
+   labeled configurations, so the main results would stop being default. Rejected.
+3. Put the RFC 9608 `noRevAvail` extension on every leaf. Chosen. The default policy
+   lists this extension as a reason to skip the revocation check. It is also true
+   of these leaves, which have no revocation source.
+
+This changes the M1 leaf certificates. It changes no expected value. pyHanko and
+pdfsig reported the same verdicts on samples with the extension, and gate 4 checks
+this against the M1 verdicts. Case B5 in M3 must leave the extension off, because it
+tests a revocation source that cannot be reached.
+
+## How far the M2 samples go
+
+Before the first real M2 run, pyHanko, pdfsig and DSS ran on throw-away PDFs built
+with a separate PKI. Some were built with the same recipe functions as the C group,
+because the report format of a modified file cannot be learned otherwise. The kit's
+own fixtures were not run. This means the C-group behavior was largely visible
+before the first run. `cases.yaml` was not changed after seeing it. Two things were
+changed:
+
+- The DSS mapping was written, following the brief's three `TOTAL_PASSED` rules.
+- The C2 form fill first replaced the appearance dictionary, which DSS reported as
+  undefined changes. That was a defect in the fixture, because a viewer filling a
+  form keeps the dictionary, so the recipe now keeps it.
+
+A form fill that changes the page still produces a DSS visual difference warning.
+Under the brief's rule ("only signature or form-fill modifications") that is an
+other warning, so the mapping gives `VALID_WITH_UNCLASSIFIED_CHANGES`. The rule was
+not loosened to fit case C2.
+
 ## Changes to `oracle/mapping.yaml` before the first real run
 
 Version 1 is the brief's mapping, committed before any sampling. Version 2 follows
@@ -94,6 +154,9 @@ sampling:
 2. pdfsig has an explicit list of informational lines, so that any other line is
    unmapped. The brief's "any other string" needs this to be enforceable.
 3. The catch-all exit code entry was removed. An exit code not listed is unmapped.
+
+Version 3 replaces the placeholder DSS section with the real one, before DSS has run
+on any fixture.
 
 No expected value in `cases.yaml` changed.
 

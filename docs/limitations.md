@@ -22,10 +22,20 @@
 - **`spec_ref` is `TODO` on every `spec` case.** ISO 32000-2, ETSI EN 319 102-1 and
   ETSI EN 319 142 have not been read for this project, so those verdicts rest on
   general understanding of the standards until the clauses are confirmed.
-- **Three pdfsig strings are only tested with synthetic lines:**
-  `Signature is Invalid.`, `Certificate has been Revoked.`, `Certificate has Expired`.
+- **Two pdfsig strings are only tested with synthetic lines:**
+  `Signature is Invalid.`, `Certificate has been Revoked.`.
+- **DSS accepts the leaves only because they declare `noRevAvail`.** Without it,
+  every signature with a good chain is `INDETERMINATE` under the default policy. See
+  `decisions.md`.
+- **B2 has no claimed signing time inside the validity window.** pyHanko stamps the
+  current time, so the claim is also after expiry. A claimed time inside the window
+  is not tested.
+- **C5 covers one Hide variant**, the one that writes a new Page object without the
+  overlay. The Xref variant is not covered.
+- **C3 uses an annotation as the later change**, so it tests DocMDP level 1 rather
+  than page changes, which C4 covers.
+- **DSS runs on Java 21 in CI**, with DSS 6.5.1 and its default policy.
 - **Fixture bytes differ on every run**, because keys and signing times differ. The
   baseline compares verdicts and scores, not hashes. Each run records its own
   fixture SHA-256.
-- **Not investigated yet:** how DSS exposes modification warnings, and whether
-  Certomancer can issue backdated timestamps for B3.
+- **Not investigated yet:** whether Certomancer can issue backdated timestamps for B3.
