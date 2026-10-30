@@ -83,3 +83,23 @@ result.
 The first three commits reached GitHub in one push, so their relative order rests
 on self-reported commit dates and on git ancestry. The first externally timestamped
 event is the CI run on `ce6b4b4`.
+
+### M2
+
+The expected verdicts for N1, B2 and C1 to C5 are in `79b32c8`, and have not changed
+since. Before step 3, the tools ran on throw-away PDFs that were built with the same
+recipes and a separate PKI, so the kit's own fixtures were new to them but the
+behavior was largely visible. See "How far the M2 samples go" in
+[`docs/decisions.md`](docs/decisions.md).
+
+1. DSS mapping: [`c0d9c36`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/c0d9c36).
+2. Fixtures, DSS adapter and tests:
+   [`03dc0b7`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/03dc0b7).
+3. First real run:
+   [CI run 41087912319](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41087912319)
+   on `03dc0b7`, red at gate 4 because the baseline was still for M1.
+4. Review labels:
+   [`68328dd`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/68328dd).
+   Baseline:
+   [`3809954`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commit/3809954),
+   which changes [`baselines/baseline.json`](baselines/baseline.json) and nothing else.
