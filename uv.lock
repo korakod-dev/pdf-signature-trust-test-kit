@@ -530,6 +530,7 @@ source = { editable = "." }
 dependencies = [
     { name = "asn1crypto" },
     { name = "cryptography" },
+    { name = "pillow" },
     { name = "pyhanko" },
     { name = "pyhanko-certvalidator" },
     { name = "pyhanko-cli" },
@@ -546,6 +547,7 @@ dev = [
 requires-dist = [
     { name = "asn1crypto", specifier = "==1.5.1" },
     { name = "cryptography", specifier = "==50.0.2" },
+    { name = "pillow", specifier = "==13.0.0" },
     { name = "pyhanko", specifier = "==0.38.0" },
     { name = "pyhanko-certvalidator", specifier = "==0.33.0" },
     { name = "pyhanko-cli", specifier = "==0.6.0" },

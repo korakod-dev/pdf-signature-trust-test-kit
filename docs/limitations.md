@@ -42,6 +42,10 @@
   overlay. The Xref variant is not covered.
 - **C3 uses an annotation as the later change**, so it tests DocMDP level 1 rather
   than page changes, which C4 covers.
+- **Group F is a simulated scenario**, not an e-Tax conformance test. Its XML format is
+  invented, and no Thai Revenue Department standard has been read for this project.
+- **veraPDF passing a file does not mean that any viewer shows it correctly.** The
+  files were not opened in a viewer.
 - **DSS runs on Java 21 in CI**, with DSS 6.5.1 and its default policy.
 - **Fixture bytes differ on every run**, because keys and signing times differ. The
   baseline compares verdicts and scores, not hashes. Each run records its own

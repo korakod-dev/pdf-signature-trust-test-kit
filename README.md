@@ -9,7 +9,9 @@ It is not new vulnerability research, not a legal or compliance verdict, not an
 e-Tax conformance test, and not a ranking of tools. It reports behavior per case,
 tool version and configuration.
 
-**Status:** milestone M3 (17 cases, on pyHanko, pdfsig and EU DSS).
+**Status:** milestone M4 (20 cases, on pyHanko, pdfsig and EU DSS, with veraPDF
+checking the files labeled PDF/A-3b). Group F is a simulated scenario, not a
+conformance test.
 
 **License:** to be decided before public release.
 
@@ -26,8 +28,9 @@ Requires Python 3.12, [uv](https://docs.astral.sh/uv/), `poppler-utils` and
 ```bash
 uv sync --locked
 mvn -B -q -f adapters/dss-runner/pom.xml package
+mvn -B -q -f adapters/verapdf-runner/pom.xml package
 uv run pytest
-uv run trustkit run --milestone M3 --out out
+uv run trustkit run --milestone M4 --out out
 uv run trustkit check --results out/results.json
 uv run trustkit scan
 ```
@@ -43,7 +46,7 @@ from the baseline, and gate 4 then fails. That is expected.
 
 CI is red when any of these holds:
 
-1. a fixture property test fails;
+1. a fixture property test fails, or a file labeled PDF/A-3b fails veraPDF;
 2. a tool is missing, a case was not run, or a `TOOL_ERROR` is not recorded in the
    baseline;
 3. any output is unmapped;
@@ -58,6 +61,7 @@ result.
 - `oracle/`: expected verdicts, reference policy, verdict model, mapping, review
   labels for findings, and the log of changes to expected values.
 - `adapters/dss-runner/`: thin Java command line around EU DSS.
+- `adapters/verapdf-runner/`: packages the veraPDF command line at a pinned version.
 - `src/trustkit/`: PKI, fixtures, local revocation service, adapters, scoring, gates,
   report, CLI.
 - `baselines/baseline.json`: the committed expected scored results.

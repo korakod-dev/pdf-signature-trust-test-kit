@@ -13,6 +13,7 @@ TOOLS_BY_MILESTONE = {
     "M1": ("pyhanko", "pdfsig"),
     "M2": ("pyhanko", "pdfsig", "dss"),
     "M3": ("pyhanko", "pdfsig", "dss"),
+    "M4": ("pyhanko", "pdfsig", "dss"),
 }
 
 

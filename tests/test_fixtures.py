@@ -7,9 +7,9 @@ from cryptography import x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 
-from trustkit import fixtures, pki, scan
+from trustkit import fixtures, gates, pki, scan
 from trustkit.adapters.pdfsig_adapter import build_nss_database, list_nss_database
-from trustkit.fixtures import inspect
+from trustkit.fixtures import inspect, pdfa
 from trustkit.oracle import ROOT
 
 
@@ -278,13 +278,13 @@ def test_c5_new_page_lists_one_content_stream_and_the_signed_page_lists_two(buil
 def test_every_active_case_has_a_fixture(built):
     from trustkit.oracle import cases_for
 
-    assert {c.id for c in cases_for("M3")} == set(built[1])
+    assert {c.id for c in cases_for("M4")} == set(built[1])
 
 
 def test_every_active_case_has_rationale_and_basis():
     from trustkit.oracle import cases_for
 
-    for case in cases_for("M3"):
+    for case in cases_for("M4"):
         assert case.rationale.strip() and case.basis in ("crypto", "spec", "policy")
 
 
@@ -369,3 +369,56 @@ def test_tsa_certificates_are_for_timestamping_only(built):
         extension = identity.cert.extensions.get_extension_for_class(x509.ExtendedKeyUsage)
         assert extension.critical
         assert list(extension.value) == [x509.oid.ExtendedKeyUsageOID.TIME_STAMPING]
+
+
+def test_f1_signature_covers_the_attachment_and_the_whole_file(built):
+    data = _read(built, "F1")
+    region = inspect.signed_region(data)
+    position = data.index(pdfa.synthetic_xml(pdfa.PAGE_AMOUNT))
+    assert region.covers(position)
+    assert region.start1 == 0 and region.start2 + region.length2 == len(data)
+    assert inspect.digest_matches(data)
+
+
+def test_f1_declares_pdfa_3b_with_an_embedded_font_and_an_output_intent(built):
+    data = _read(built, "F1")
+    assert data.startswith(b"%PDF-1.7")
+    assert b"<pdfaid:part>3</pdfaid:part>" in data
+    assert b"<pdfaid:conformance>B</pdfaid:conformance>" in data
+    assert b"/FontFile2" in data and b"/GTS_PDFA1" in data and b"/AFRelationship /Data" in data
+
+
+def test_f1_unsigned_file_is_the_start_of_the_signed_file(built):
+    _, _, base = built
+    unsigned = (base / "fixtures" / "unsigned" / "F1.pdf").read_bytes()
+    assert _read(built, "F1").startswith(unsigned)
+
+
+def test_f2_replaces_only_the_attachment_after_signing(built):
+    revision, later = _assert_later_update(built, "F2")
+    assert pdfa.synthetic_xml(pdfa.PAGE_AMOUNT) in revision
+    assert pdfa.synthetic_xml(pdfa.OTHER_AMOUNT) not in revision
+    assert pdfa.synthetic_xml(pdfa.OTHER_AMOUNT) in later
+    assert b"/Type /Page" not in later and b"BT " not in later
+    assert b"/DocMDP" not in revision + later
+
+
+def test_f3_xml_disagrees_with_the_page_before_signing_and_nothing_follows(built):
+    data = _read(built, "F3")
+    region = inspect.signed_region(data)
+    assert pdfa.PAGE_AMOUNT != pdfa.OTHER_AMOUNT
+    assert region.covers(data.index(pdfa.synthetic_xml(pdfa.OTHER_AMOUNT)))
+    assert pdfa.synthetic_xml(pdfa.PAGE_AMOUNT) not in data
+    assert region.start2 + region.length2 == len(data)
+
+
+def test_attachment_data_is_obviously_synthetic():
+    xml = pdfa.synthetic_xml(pdfa.PAGE_AMOUNT)
+    assert b"TEST ONLY" in xml and b"Example Test Org" in xml and b"example.test" in xml
+
+
+def test_every_pdfa_check_file_exists(built):
+    _, _, base = built
+    for relative in fixtures.PDFA_CHECKS.values():
+        assert (base / "fixtures" / relative).exists()
+    assert tuple(fixtures.PDFA_CHECKS) == gates.PDFA_CHECK_NAMES

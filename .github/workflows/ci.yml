@@ -41,13 +41,14 @@ jobs:
           uv sync --locked
 
       # Dependencies are fetched here, before the step that has no network.
-      - name: Build the DSS runner
+      - name: Build the DSS and veraPDF runners
         run: |
           curl -fsSLO https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.tar.gz
           echo "bcfe4fe305c962ace56ac7b5fc7a08b87d5abd8b7e89027ab251069faebee516b0ded8961445d6d91ec1985dfe30f8153268843c89aa392733d1a3ec956c9978  apache-maven-3.9.11-bin.tar.gz" | sha512sum -c -
           tar xzf apache-maven-3.9.11-bin.tar.gz -C "$RUNNER_TEMP"
           rm apache-maven-3.9.11-bin.tar.gz
           "$RUNNER_TEMP/apache-maven-3.9.11/bin/mvn" -B -q -f adapters/dss-runner/pom.xml package
+          "$RUNNER_TEMP/apache-maven-3.9.11/bin/mvn" -B -q -f adapters/verapdf-runner/pom.xml package
 
       - name: Gate 5, key material in tracked files
         run: uv run --locked trustkit scan
@@ -63,7 +64,7 @@ jobs:
             ip link set lo up &&
             exec setpriv --reuid="$1" --regid="$2" --init-groups \
               env "PATH=$3" "HOME=$4" "GITHUB_SHA=$5" \
-              "$6/.venv/bin/trustkit" run --milestone M3 --out out --require-network-isolation
+              "$6/.venv/bin/trustkit" run --milestone M4 --out out --require-network-isolation
           ' sh "$(id -u)" "$(id -g)" "$PATH" "$HOME" "$GITHUB_SHA" "$GITHUB_WORKSPACE"
 
       - name: Publish results to the job summary

@@ -18,7 +18,7 @@ from pyhanko.sign.timestamps.dummy_client import DummyTimeStamper
 from pyhanko.sign.validation.dss import DocumentSecurityStore
 from reportlab.pdfgen import canvas
 
-from trustkit.fixtures import inspect
+from trustkit.fixtures import inspect, pdfa
 from trustkit.pki import Identity, TestPki
 
 AMOUNT_TEXT = b"Amount: 1000.00"
@@ -155,6 +155,7 @@ def sign(
     docmdp: fields.MDPPerm | None = None,
     tsa: DummyTimeStamper | None = None,
     signing_time: dt.datetime | None = None,
+    preserve_xmp: bool = False,
 ) -> bytes:
     """Sign with the issuer embedded, so B1 also tests that a root in the file is not trusted.
 
@@ -168,6 +169,8 @@ def sign(
     if signer is None:
         raise RuntimeError("pyHanko could not load the test signer")
     writer = IncrementalPdfFileWriter(io.BytesIO(data))
+    if preserve_xmp:
+        pdfa.keep_xmp(writer)
     meta = signers.PdfSignatureMetadata(
         field_name=field_name,
         md_algorithm="sha256",
@@ -326,6 +329,19 @@ def embed_revocation_data(signed: bytes, root: Identity, crl: bytes) -> bytes:
     return _update(signed, change)
 
 
+def replace_attachment(signed: bytes, xml: bytes) -> bytes:
+    """F2: point the attachment at new XML. No page object changes."""
+    writer = IncrementalPdfFileWriter(io.BytesIO(signed))
+    pdfa.keep_xmp(writer)
+    spec = writer.root["/Names"]["/EmbeddedFiles"]["/Names"][1]
+    spec["/EF"][generic.pdf_name("/F")] = writer.add_object(pdfa.embedded_file(writer, xml))
+    spec["/EF"][generic.pdf_name("/UF")] = spec["/EF"].raw_get("/F")
+    writer.update_container(spec)
+    output = io.BytesIO()
+    writer.write(output)
+    return output.getvalue()
+
+
 def _write(out_dir: Path, contents: dict[str, tuple]) -> dict[str, Fixture]:
     out_dir.mkdir(parents=True, exist_ok=True)
     built = {}
@@ -416,4 +432,40 @@ def build_m3(out_dir: Path, pki: TestPki) -> dict[str, Fixture]:
     }
 
 
-BUILDERS = {"M1": build_m1, "M2": build_m2, "M3": build_m3}
+def build_m4(out_dir: Path, pki: TestPki) -> dict[str, Fixture]:
+    matching = pdfa.pdfa_with_xml(pdfa.synthetic_xml(pdfa.PAGE_AMOUNT))
+    disagreeing = pdfa.pdfa_with_xml(pdfa.synthetic_xml(pdfa.OTHER_AMOUNT))
+    f1 = sign(matching, pki.leaf, pki.root, preserve_xmp=True)
+    f3 = sign(disagreeing, pki.leaf, pki.root, preserve_xmp=True)
+    # The unsigned files exist for the veraPDF check before signing. See PDFA_CHECKS.
+    unsigned_dir = out_dir / "unsigned"
+    unsigned_dir.mkdir(parents=True, exist_ok=True)
+    (unsigned_dir / "F1.pdf").write_bytes(matching)
+    (unsigned_dir / "F3.pdf").write_bytes(disagreeing)
+    return {
+        **build_m3(out_dir, pki),
+        **_write(
+            out_dir,
+            {
+                "F1": (f1, pki.root),
+                "F2": (
+                    replace_attachment(f1, pdfa.synthetic_xml(pdfa.OTHER_AMOUNT)),
+                    pki.root,
+                    f1,
+                ),
+                "F3": (f3, pki.root),
+            },
+        ),
+    }
+
+
+# Files that are labeled PDF/A-3b, relative to the fixture directory. gates.check_pdfa
+# requires all of them to pass veraPDF.
+PDFA_CHECKS = {
+    "F1 before signing": "unsigned/F1.pdf",
+    "F1 after signing": "F1.pdf",
+    "F3 before signing": "unsigned/F3.pdf",
+    "F3 after signing": "F3.pdf",
+}
+
+BUILDERS = {"M1": build_m1, "M2": build_m2, "M3": build_m3, "M4": build_m4}

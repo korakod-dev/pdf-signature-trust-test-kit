@@ -10,7 +10,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from trustkit import fixtures, gates, pki, report, scan, services
+from trustkit import fixtures, gates, pki, report, scan, services, verapdf
 from trustkit.adapters.dss_adapter import DssAdapter
 from trustkit.adapters.pdfsig_adapter import PdfsigAdapter
 from trustkit.adapters.pyhanko_adapter import PyHankoAdapter
@@ -55,6 +55,14 @@ def run_cases(milestone: str, out_dir: Path) -> dict:
     ) as work:
         test_pki = pki.generate(certs_dir, Path(keys))
         built = fixtures.BUILDERS[milestone](fixtures_dir, test_pki)
+        pdfa_checks = (
+            {
+                name: verapdf.check(fixtures_dir / relative)
+                for name, relative in fixtures.PDFA_CHECKS.items()
+            }
+            if "F1" in built
+            else None
+        )
         with services.RevocationService(test_pki) as revocation:
             for case in cases:
                 fixture = built[case.id]
@@ -72,7 +80,7 @@ def run_cases(milestone: str, out_dir: Path) -> dict:
                     row["signals"]["revocation_requests"] = revocation.take_requests()
                     observations.append(row)
 
-    return {
+    results = {
         "milestone": milestone,
         "date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
         "commit": current_commit(),
@@ -91,6 +99,9 @@ def run_cases(milestone: str, out_dir: Path) -> dict:
         ],
         "observations": observations,
     }
+    if pdfa_checks is not None:
+        results["pdfa"] = {"version": verapdf.version(), "checks": pdfa_checks}
+    return results
 
 
 def command_run(args: argparse.Namespace) -> int:
@@ -145,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
 
     run = commands.add_parser("run", help="generate fixtures and run the validators")
-    run.add_argument("--milestone", default="M3", choices=sorted(TOOLS_BY_MILESTONE))
+    run.add_argument("--milestone", default="M4", choices=sorted(TOOLS_BY_MILESTONE))
     run.add_argument("--out", type=Path, default=ROOT / "out")
     run.add_argument("--require-network-isolation", action="store_true")
     run.set_defaults(func=command_run)

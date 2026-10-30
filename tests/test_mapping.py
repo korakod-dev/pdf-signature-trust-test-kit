@@ -4,8 +4,11 @@ Those outputs are in tests/data/raw_outputs. Lines marked synthetic have not bee
 seen from the installed tool version, so they only test the parser.
 """
 
+import json
+
 import pytest
 
+from trustkit import verapdf
 from trustkit.adapters.dss_adapter import parse_reports
 from trustkit.adapters.pdfsig_adapter import parse_report
 from trustkit.adapters.pyhanko_adapter import map_signals
@@ -278,3 +281,27 @@ def test_dss_records_the_timestamp_indications(mapping):
 def test_pdfsig_generic_certificate_message_is_an_explicit_tool_error_not_a_verdict(mapping):
     stdout, exit_code = _pdfsig("no_ocsp_generic_cert_error")
     assert parse_report(stdout, exit_code, mapping)[:2] == ("TOOL_ERROR", False)
+
+
+def test_verapdf_capture_is_read_as_compliant():
+    report = verapdf.parse_report((RAW_OUTPUTS / "verapdf" / "compliant.json").read_text())
+    assert report["compliant"] is True
+    assert "PDF/A-3B" in report["profile"]
+    assert report["failed_rules"] == []
+
+
+def test_verapdf_a_failed_report_is_not_compliant_and_names_the_rule():
+    data = json.loads((RAW_OUTPUTS / "verapdf" / "compliant.json").read_text())
+    result = data["report"]["jobs"][0]["validationResult"]
+    result = result[0] if isinstance(result, list) else result
+    result["compliant"] = False
+    result["details"]["ruleSummaries"] = [{"clause": "6.1.2", "testNumber": 1}]
+    report = verapdf.parse_report(json.dumps(data))
+    assert report["compliant"] is False
+    assert report["failed_rules"] == ["6.1.2-1"]
+
+
+def test_verapdf_unreadable_output_is_not_compliant(tmp_path):
+    missing_jar = tmp_path / "missing.jar"
+    assert verapdf.check(tmp_path / "x.pdf", jar=missing_jar)["compliant"] is False
+    assert verapdf.version(jar=missing_jar) is None

@@ -183,3 +183,36 @@ def test_gate2_accepts_a_tool_error_recorded_by_name_only(clean_results):
     assert _gate(gates.check_all(clean_results, gates.baseline_from_results(clean_results)), 2)
     baseline = gates.baseline_from_results(clean_results, (name,))
     assert gates.check_all(clean_results, baseline) == []
+
+
+def _m4_results(clean_results: dict) -> dict:
+    clean_results["milestone"] = "M4"
+    clean_results["pdfa"] = {
+        "version": "x",
+        "checks": {name: {"compliant": True} for name in gates.PDFA_CHECK_NAMES},
+    }
+    return clean_results
+
+
+def test_gate1_passes_when_every_labeled_file_passed_verapdf(clean_results):
+    assert gates.check_pdfa(_m4_results(clean_results)) == []
+
+
+def test_gate1_fails_when_a_labeled_file_failed_verapdf(clean_results):
+    results = _m4_results(clean_results)
+    results["pdfa"]["checks"]["F1 after signing"]["compliant"] = False
+    assert any("F1 after signing" in f for f in _gate(gates.check_pdfa(results), 1))
+
+
+def test_gate1_fails_when_a_labeled_file_was_not_checked(clean_results):
+    results = _m4_results(clean_results)
+    del results["pdfa"]["checks"]["F3 before signing"]
+    assert any("F3 before signing" in f for f in _gate(gates.check_pdfa(results), 1))
+
+
+def test_gate1_fails_when_verapdf_is_missing(clean_results):
+    results = _m4_results(clean_results)
+    results["pdfa"]["version"] = None
+    assert gates.check_pdfa(results) == ["gate 1: veraPDF is missing"]
+    del results["pdfa"]
+    assert gates.check_pdfa(results) == ["gate 1: veraPDF is missing"]

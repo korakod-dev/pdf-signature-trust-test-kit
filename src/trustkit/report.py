@@ -42,6 +42,11 @@ def render_markdown(results: dict) -> str:
         options = next(row["options"] for row in results["observations"] if row["tool"] == tool)
         lines.append(f"- {tool}: {'; '.join(options)}")
 
+    if results.get("pdfa"):
+        lines += ["", f"## PDF/A-3b checks (veraPDF {results['pdfa']['version']})", ""]
+        for name, check in results["pdfa"]["checks"].items():
+            lines.append(f"- {name}: {'passed' if check['compliant'] else 'failed'}")
+
     informational = [c["id"] for c in results["cases"] if c["informational"]]
     if informational:
         lines += ["", "## Informational cases", ""]

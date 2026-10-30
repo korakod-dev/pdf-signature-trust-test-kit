@@ -1,10 +1,18 @@
-"""CI gates 2, 3 and 4. Gate 1 is pytest and gate 5 is trustkit.scan.
+"""CI gates 2, 3 and 4, and the PDF/A part of gate 1. The rest of gate 1 is pytest, and gate 5
+is trustkit.scan.
 
 A tool disagreeing with the oracle is a recorded result and fails no gate here. It
 fails gate 4 only if it differs from the committed baseline.
 """
 
 from trustkit.oracle import TOOLS_BY_MILESTONE, cases_for
+
+PDFA_CHECK_NAMES = (
+    "F1 before signing",
+    "F1 after signing",
+    "F3 before signing",
+    "F3 after signing",
+)
 
 
 def baseline_from_results(results: dict, record_tool_errors: tuple[str, ...] = ()) -> dict:
@@ -92,8 +100,26 @@ def check_baseline(results: dict, baseline: dict | None) -> list[str]:
     return failures
 
 
+def check_pdfa(results: dict) -> list[str]:
+    """Gate 1: from M4, every file labeled PDF/A-3b must have passed veraPDF."""
+    if results["milestone"] != "M4":
+        return []
+    pdfa = results.get("pdfa")
+    if not pdfa or not pdfa.get("version"):
+        return ["gate 1: veraPDF is missing"]
+    failures = []
+    for name in PDFA_CHECK_NAMES:
+        check = pdfa["checks"].get(name)
+        if check is None:
+            failures.append(f"gate 1: {name} was not checked with veraPDF")
+        elif not check["compliant"]:
+            failures.append(f"gate 1: {name} failed veraPDF: {check}")
+    return failures
+
+
 def check_all(results: dict, baseline: dict | None) -> list[str]:
     return [
+        *check_pdfa(results),
         *check_completeness(results),
         *check_tool_errors(results, baseline),
         *check_unmapped(results),
