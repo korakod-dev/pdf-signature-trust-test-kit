@@ -47,6 +47,10 @@
 - **veraPDF passing a file does not mean that any viewer shows it correctly.** The
   files were not opened in a viewer.
 - **DSS runs on Java 21 in CI**, with DSS 6.5.1 and its default policy.
+- **The local test page uses whatever tools are installed.** On Homebrew poppler 26.04.0,
+  A2 exits 1 and maps to `TOOL_ERROR`, and B5 maps to `VALID`, unlike the pinned 24.02.0.
+  Its sandbox uses macOS `sandbox-exec`, which Apple marks as deprecated, and a chosen file
+  has no revocation access, so its verdicts can differ from a run that can reach revocation.
 - **Fixture bytes differ on every run**, because keys and signing times differ. The
   baseline compares verdicts and scores, not hashes. Each run records its own
   fixture SHA-256.

@@ -74,3 +74,18 @@ def test_public_report_writes_both_files(results, tmp_path):
     assert written["withheld_cases"] == 1
     assert [row["case_id"] for row in written["observations"]] == ["A1"]
     assert "F2" not in (out / "results.md").read_text(encoding="utf-8")
+    page = (out / "index.html").read_text(encoding="utf-8")
+    assert "F2" not in page
+    assert "Cases withheld from this table: 1" in page
+
+
+def test_page_escapes_tool_output_and_loads_nothing_external(results):
+    results["cases"][0]["title"] = "<script>alert(1)</script>"
+    page = report.render_html(results)
+    assert "<script>" not in page
+    assert "http://" not in page and "https://" not in page
+
+
+def test_page_marks_itself_as_a_draft_by_default(results):
+    assert "Draft. Not published." in report.render_html(results)
+    assert "Draft. Not published." not in report.render_html(results, draft=False)

@@ -42,6 +42,14 @@ outside the repository, and are deleted when the run ends.
 Results on a machine other than Ubuntu 24.04 with the pinned packages can differ
 from the baseline, and gate 4 then fails. That is expected.
 
+## Local test page
+
+On macOS, `uv run trustkit serve` opens a page at `http://127.0.0.1:18770/` that runs the
+validators on a synthetic sample or on a PDF you choose. It listens on loopback only.
+Validators run in a sandbox, a chosen file gets no network and is deleted after the check,
+and the keys and samples are deleted when the server stops. The mapping is written for the
+versions pinned in CI, so results on other versions are not the kit's results.
+
 ## CI gates
 
 CI is red when any of these holds:

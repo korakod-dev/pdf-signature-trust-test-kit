@@ -1,4 +1,4 @@
-"""Command line: run, check, scan, write-baseline, public-report."""
+"""Command line: run, check, scan, write-baseline, public-report, serve."""
 
 import argparse
 import datetime as dt
@@ -10,7 +10,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from trustkit import fixtures, gates, pki, report, scan, services, verapdf
+from trustkit import fixtures, gates, pki, report, scan, services, tester, verapdf
 from trustkit.adapters.dss_adapter import DssAdapter
 from trustkit.adapters.pdfsig_adapter import PdfsigAdapter
 from trustkit.adapters.pyhanko_adapter import PyHankoAdapter
@@ -156,6 +156,7 @@ def command_public_report(args: argparse.Namespace) -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "results.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     (args.out / "results.md").write_text(report.render_markdown(results), encoding="utf-8")
+    (args.out / "index.html").write_text(report.render_html(results), encoding="utf-8")
     return 0
 
 
@@ -194,6 +195,10 @@ def main(argv: list[str] | None = None) -> int:
     public.add_argument("--results", type=Path, default=ROOT / "out" / "results.json")
     public.add_argument("--out", type=Path, default=ROOT / "out" / "public")
     public.set_defaults(func=command_public_report)
+
+    serve = commands.add_parser("serve", help="local test page, on loopback only")
+    serve.add_argument("--port", type=int, default=tester.DEFAULT_PORT)
+    serve.set_defaults(func=lambda args: tester.serve(args.port))
 
     args = parser.parse_args(argv)
     return args.func(args)
