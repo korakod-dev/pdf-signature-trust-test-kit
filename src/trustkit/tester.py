@@ -71,6 +71,7 @@ VERDICT_CLASSES = {
 }
 SHOWN_SIGNALS = (
     "problem",
+    "signer_subject",
     "sub_indication",
     "coverage",
     "modification_level",
