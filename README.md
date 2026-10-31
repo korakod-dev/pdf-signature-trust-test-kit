@@ -9,11 +9,33 @@ It is not new vulnerability research, not a legal or compliance verdict, not an
 e-Tax conformance test, and not a ranking of tools. It reports behavior per case,
 tool version and configuration.
 
-**Status:** milestone M4 (20 cases, on pyHanko, pdfsig and EU DSS, with veraPDF
-checking the files labeled PDF/A-3b). Group F is a simulated scenario, not a
-conformance test.
+**Status:** milestone M4 is complete (20 cases, on pyHanko, pdfsig and EU DSS, with
+veraPDF checking the files labeled PDF/A-3b). Group F is a simulated scenario, not a
+conformance test. Milestone M5 is in draft: the results page, case study and clip are
+in [`drafts/`](drafts/), and none of them is approved for publication.
+
+This repository is private, and nothing has been released.
 
 **License:** to be decided before public release.
+
+## Results
+
+The latest public table covers 57 observations on 19 of the 20 cases, from
+[CI run 41162086344](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41162086344)
+on `f276ef3`, dated 2026-10-31. One case is withheld from public results.
+
+| Score | Count |
+|---|---:|
+| `AGREE` | 35 |
+| `PARTIAL` | 10 |
+| `INFO` | 6 |
+| `MISSED` | 3 |
+| `OVER_REJECTED` | 2 |
+| `ERROR` | 1 |
+
+These counts describe the cases as a set, and they do not rank tools. See
+[`drafts/results.html`](drafts/results.html) for the table and
+[`docs/limitations.md`](docs/limitations.md) for what it does not show.
 
 ## Evidence of ordering
 
@@ -39,6 +61,10 @@ uv run trustkit scan
 `out/fixtures/` and `out/certs/`. Test keys exist only in a temporary directory
 outside the repository, and are deleted when the run ends.
 
+`uv run trustkit public-report` reads `out/results.json` and writes `results.json`,
+`results.md` and `index.html` to `out/public/`, without the cases listed in
+`oracle/withheld.yaml`.
+
 Results on a machine other than Ubuntu 24.04 with the pinned packages can differ
 from the baseline, and gate 4 then fails. That is expected.
 
@@ -49,6 +75,9 @@ validators on a synthetic sample or on a PDF you choose. It listens on loopback 
 Validators run in a sandbox, a chosen file gets no network and is deleted after the check,
 and the keys and samples are deleted when the server stops. The mapping is written for the
 versions pinned in CI, so results on other versions are not the kit's results.
+
+Stop the server before running the tests, because `tests/test_services.py` needs the
+revocation service port. `.claude/launch.json` starts the page from the Claude desktop app.
 
 ## CI gates
 
@@ -67,16 +96,26 @@ result.
 ## Where things are
 
 - `oracle/`: expected verdicts, reference policy, verdict model, mapping, review
-  labels for findings, and the log of changes to expected values.
+  labels for findings, withheld cases, and the log of changes to expected values.
 - `adapters/dss-runner/`: thin Java command line around EU DSS.
 - `adapters/verapdf-runner/`: packages the veraPDF command line at a pinned version.
 - `src/trustkit/`: PKI, fixtures, local revocation service, adapters, scoring, gates,
-  report, CLI.
+  report, local test page, CLI.
 - `baselines/baseline.json`: the committed expected scored results.
 - `tests/data/raw_outputs/`: captured output of an unrelated throw-away PDF.
 - `docs/decisions.md`: corrections to the original brief and the choices made.
 - `docs/limitations.md`: what these results do not show.
 - `docs/related-work.md`: related projects and research.
+- `drafts/`: M5 drafts, not approved for publication.
+  - `results.html`, `results-clip.html`: public results table, with and without the
+    draft label.
+  - `case-study.md`: case study, with open items marked `TODO`.
+  - `clip/pdf-signature-trust-demo.mp4`: silent demo clip, about 2:05, with Thai callouts.
+  - `clip-script.md`: the clip's scenes and the wording to avoid when publishing it.
+  - `clip-files/`: the four synthetic PDFs shown in the clip (A1, C4, D1, F3) and the XML
+    attached to F3.
+  - `clip/build_clip.py`: rebuilds the clip on macOS with Chrome and ffmpeg, while
+    `trustkit serve` is running. Run it with `.venv/bin/python`.
 
 ## Commit order
 
