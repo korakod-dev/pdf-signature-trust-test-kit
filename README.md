@@ -12,17 +12,18 @@ tool version and configuration.
 **Status:** milestone M4 is complete (20 cases, on pyHanko, pdfsig and EU DSS, with
 veraPDF checking the files labeled PDF/A-3b). Group F is a simulated scenario, not a
 conformance test. Milestone M5 is in draft: the results page, case study and clip are
-in [`drafts/`](drafts/), and none of them is approved for publication.
+in [`drafts/`](drafts/), and are not final.
 
-This repository is private, and nothing has been released.
-
-**License:** to be decided before public release.
+**License:** none has been chosen, so this repository grants no rights to reuse its
+contents.
 
 ## Results
 
-The latest public table covers 57 observations on 19 of the 20 cases, from
+The latest results table covers 57 observations on 19 of the 20 cases, from
 [CI run 41162086344](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41162086344)
-on `f276ef3`, dated 2026-10-31. One case is withheld from public results.
+on `f276ef3`, dated 2026-10-31. The table leaves out the case listed in
+[`oracle/withheld.yaml`](oracle/withheld.yaml). That case is still in the source, the
+baseline and the CI artifacts.
 
 | Score | Count |
 |---|---:|
@@ -106,9 +107,8 @@ result.
 - `docs/decisions.md`: corrections to the original brief and the choices made.
 - `docs/limitations.md`: what these results do not show.
 - `docs/related-work.md`: related projects and research.
-- `drafts/`: M5 drafts, not approved for publication.
-  - `results.html`, `results-clip.html`: public results table, with and without the
-    draft label.
+- `drafts/`: M5 drafts, not final.
+  - `results.html`, `results-clip.html`: results table, with and without the draft label.
   - `case-study.md`: case study, with open items marked `TODO`.
   - `clip/pdf-signature-trust-demo.mp4`: silent demo clip, about 2:05, with Thai callouts.
   - `clip-script.md`: the clip's scenes and the wording to avoid when publishing it.
