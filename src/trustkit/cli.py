@@ -1,4 +1,4 @@
-"""Command line: run, check, scan, write-baseline."""
+"""Command line: run, check, scan, write-baseline, public-report."""
 
 import argparse
 import datetime as dt
@@ -151,6 +151,14 @@ def command_write_baseline(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_public_report(args: argparse.Namespace) -> int:
+    results = report.public_results(json.loads(args.results.read_text(encoding="utf-8")))
+    args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "results.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+    (args.out / "results.md").write_text(report.render_markdown(results), encoding="utf-8")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="trustkit")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -181,6 +189,11 @@ def main(argv: list[str] | None = None) -> int:
         help="accept this TOOL_ERROR in the baseline",
     )
     write.set_defaults(func=command_write_baseline)
+
+    public = commands.add_parser("public-report", help="write results without withheld cases")
+    public.add_argument("--results", type=Path, default=ROOT / "out" / "results.json")
+    public.add_argument("--out", type=Path, default=ROOT / "out" / "public")
+    public.set_defaults(func=command_public_report)
 
     args = parser.parse_args(argv)
     return args.func(args)

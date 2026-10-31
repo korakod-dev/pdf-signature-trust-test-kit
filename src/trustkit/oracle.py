@@ -64,3 +64,8 @@ def load_findings(path: Path = ORACLE_DIR / "findings.yaml") -> dict[tuple[str, 
     """Review labels, keyed by (case id, tool)."""
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     return {(f["case"], f["tool"]): f for f in data["findings"]}
+
+
+def load_withheld(path: Path = ORACLE_DIR / "withheld.yaml") -> set[str]:
+    """Ids of the cases left out of public results."""
+    return set(yaml.safe_load(path.read_text(encoding="utf-8"))["withheld"])

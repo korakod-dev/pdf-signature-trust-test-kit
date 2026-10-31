@@ -1,6 +1,18 @@
 """Renders the results table. Reports behavior per case and version, not a ranking."""
 
-from trustkit.oracle import load_findings
+from trustkit.oracle import load_findings, load_withheld
+
+
+def public_results(results: dict, withheld: set[str] | None = None) -> dict:
+    """A copy of the results without the withheld cases. It says how many, and not why."""
+    withheld = load_withheld() if withheld is None else withheld
+    removed = sum(case["id"] in withheld for case in results["cases"])
+    return {
+        **results,
+        "cases": [case for case in results["cases"] if case["id"] not in withheld],
+        "observations": [row for row in results["observations"] if row["case_id"] not in withheld],
+        "withheld_cases": removed,
+    }
 
 
 def render_markdown(results: dict) -> str:
@@ -36,6 +48,9 @@ def render_markdown(results: dict) -> str:
         lines.append(
             f"| {case['id']} | {case['expected']} | {case['basis']} | " + " | ".join(cells) + " |"
         )
+
+    if results.get("withheld_cases"):
+        lines += ["", f"Cases withheld from this table: {results['withheld_cases']}"]
 
     lines += ["", "## Options", ""]
     for tool in tools:

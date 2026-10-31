@@ -276,6 +276,9 @@ No expected value in `cases.yaml` changed.
   install step goes red and someone must update the pin. A silent tool upgrade in
   a regression kit is worse.
 - **Actions are pinned by commit SHA.**
+- **Public results can withhold cases.** `trustkit public-report` leaves out the cases
+  in `oracle/withheld.yaml` and states how many. Private runs, the baseline and the
+  expected verdicts still include them.
 - **Network isolation:** `unshare --net` under `sudo` in CI, then back to the runner
   user. `results.json` records whether the routing table was empty. Locally on
   macOS there is no namespace, so local runs report `network_isolated: false`.
