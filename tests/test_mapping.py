@@ -218,6 +218,22 @@ def test_dss_captures(mapping, name, verdict, sub_indication, modifications):
     assert signals["modifications"] == modifications
 
 
+@pytest.mark.parametrize(
+    "path, verdict",
+    [
+        ("/Catalog /DSS 15 0 R", "VALID"),
+        ("/Catalog /DSS", "VALID"),
+        ("/Catalog /DSSX 15 0 R", "VALID_WITH_UNCLASSIFIED_CHANGES"),
+        ("/Catalog /Metadata 15 0 R", "VALID_WITH_UNCLASSIFIED_CHANGES"),
+        ("/Catalog /StructTreeRoot 15 0 R", "VALID_WITH_UNCLASSIFIED_CHANGES"),
+    ],
+)
+def test_dss_extension_change_counts_only_under_dss(mapping, path, verdict):
+    simple, diagnostic = _dss("past_timestamp")
+    edited = diagnostic.replace("/Catalog /DSS 15 0 R", path)
+    assert parse_reports(simple, edited, mapping)[:2] == (verdict, False)
+
+
 def test_dss_captures_are_all_exercised():
     parametrized = {capture[0] for capture in DSS_CAPTURES} | {"no_signatures"}
     assert {p.name for p in DSS.iterdir() if p.is_dir()} == parametrized

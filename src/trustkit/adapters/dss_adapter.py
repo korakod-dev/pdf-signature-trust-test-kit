@@ -32,6 +32,15 @@ def _modifications(signature: ET.Element) -> list[str]:
     return sorted(set(found))
 
 
+def _extension_paths(signature: ET.Element) -> list[str]:
+    """Object paths of the ExtensionChange entries, from the diagnostic data."""
+    changes = signature.findall(
+        f"{DIAGNOSTIC}PDFRevision/{DIAGNOSTIC}ModificationDetection"
+        f"/{DIAGNOSTIC}ObjectModifications/{DIAGNOSTIC}ExtensionChange"
+    )
+    return [(change.text or "").strip() for change in changes]
+
+
 def _first_signature(diagnostic: ET.Element) -> ET.Element:
     """The signature whose ByteRange ends earliest, which is the first one applied."""
 
@@ -103,6 +112,13 @@ def parse_reports(
     unknown = sorted(set(others) - warnings - set(table["informational_messages"]))
     if unknown or errors:
         return TOOL_ERROR, True, None, {**signals, "problem": f"unmapped message {unknown + errors}"}
+
+    # DSS also files other objects, such as /Metadata, under ExtensionChange.
+    prefix = table["extension_path"]
+    if any(
+        path != prefix and not path.startswith(f"{prefix} ") for path in _extension_paths(first)
+    ):
+        return "VALID_WITH_UNCLASSIFIED_CHANGES", False, "passed-other-modifications", signals
 
     significant = set(modifications) - extensions
     if not significant and not warnings & set(others):

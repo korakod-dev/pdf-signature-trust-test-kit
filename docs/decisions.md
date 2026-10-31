@@ -197,6 +197,12 @@ DSS gives no warning for it, and the brief's rule for `VALID` is "no modificatio
 warnings". The pyHanko rules treat `LTA_UPDATES` the same way. This affects only B3,
 and it was decided after seeing B3 in a sample, so it is listed here on purpose.
 
+Corrected before M5: the DSS sources show that this category also holds `/Metadata` and
+`/StructTreeRoot`, so the rule was too broad. It now applies only to paths under
+`/Catalog /DSS`. Any other `ExtensionChange` maps to `VALID_WITH_UNCLASSIFIED_CHANGES`.
+B3 has only `/Catalog /DSS 15 0 R`, so no case in the kit should change verdict. No
+fixture in the kit covers the other paths; the unit test edits a captured report.
+
 ### How far the M3 samples go
 
 As in M2, the tools ran on samples before the first real run, this time with the same

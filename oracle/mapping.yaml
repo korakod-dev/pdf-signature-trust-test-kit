@@ -6,7 +6,7 @@
 # Status: pyHanko and pdfsig used on real fixtures since M1, and DSS since M2. M3
 # additions confirmed against throw-away PDFs, before the first real M3 run. See
 # docs/decisions.md for what changed from the initial mapping and why.
-version: 4
+version: 5
 
 pyhanko:
   # Evaluated against the fields of the status object from
@@ -98,9 +98,11 @@ dss:
   allowed_modifications:
     - SignatureOrFormFill
   # Validation material added in a later update. DSS gives no warning for it, so it
-  # counts as no modification, like LTA_UPDATES in the pyHanko rules.
+  # counts as no modification, like LTA_UPDATES in the pyHanko rules. DSS also puts
+  # other objects in this category, so only paths under extension_path count.
   extension_modifications:
     - ExtensionChange
+  extension_path: /Catalog /DSS
   other_modifications:
     - AnnotationChange
     - Undefined
