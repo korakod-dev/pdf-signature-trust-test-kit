@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testDocument xmlns="urn:example.test:not-a-real-format">
+  <note>TEST ONLY - synthetic data - Not For Production</note>
+  <organization>Example Test Org</organization>
+  <amount>9000.00</amount>
+</testDocument>

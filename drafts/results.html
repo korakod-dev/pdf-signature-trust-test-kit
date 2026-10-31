@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signature Trust Results</title>
+<style>
+:root {
+  --bg: #fbfaf8; --surface: #ffffff; --text: #1f2328; --muted: #5d646d; --line: #dcdad5;
+  --good: #1f6f4a; --warn: #8a5a00; --bad: #a3322a; --info: #2f5f94;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a; --surface: #1d2024; --text: #e8e6e3; --muted: #a3a8ae; --line: #33373c;
+    --good: #6cc79c; --warn: #e0b45c; --bad: #ef8f86; --info: #8db8e8;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171a; --surface: #1d2024; --text: #e8e6e3; --muted: #a3a8ae; --line: #33373c;
+  --good: #6cc79c; --warn: #e0b45c; --bad: #ef8f86; --info: #8db8e8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-size: 1.2rem; margin: 40px 0 12px; }
+.lead { font-size: 1.1rem; margin: 0 0 16px; max-width: 46em; }
+.muted, .run { color: var(--muted); }
+.run { font-size: .9rem; margin: 0; padding: 0; list-style: none; }
+.draft { border: 1px solid var(--warn); color: var(--warn); padding: 8px 12px; margin: 0 0 24px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .875rem; }
+th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-top: 1px solid var(--line); }
+thead th { border-top: 0; font-weight: 600; white-space: nowrap; }
+tbody th { font-weight: 400; min-width: 15em; }
+td { min-width: 9.5em; }
+.case { display: block; font-weight: 600; }
+.score { display: block; font-size: .78rem; font-weight: 600; }
+.AGREE { color: var(--good); }
+.PARTIAL, .REJECTED_DIFFERENTLY { color: var(--warn); }
+.MISSED, .OVER_REJECTED, .ERROR, .MISMATCH { color: var(--bad); }
+.INFO, .NOT_ASSESSED { color: var(--info); }
+.counts td:first-child { min-width: 0; white-space: nowrap; }
+.counts td:nth-child(2) { min-width: 0; text-align: right; }
+ul { padding-left: 20px; }
+li { margin: 6px 0; }
+code { font-size: .9em; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+<p class="draft">Draft. Not published.</p>
+<h1>PDF Signature Trust Test Kit: results</h1>
+<p class="lead">"The signature verifies" and "this document can be trusted" are different
+questions. Expected verdicts were committed before the first real run on each fixture.</p>
+<ul class="run">
+<li>Test date (UTC): 2026-10-31</li>
+<li>Commit: <code>d86dbb8</code></li>
+<li>Validators ran with no network route: True</li>
+</ul>
+
+<h2>Observations</h2>
+<p class="muted">Behavior per case, version and configuration. This is not a ranking of tools,
+and a disagreement with the expected verdict is not by itself a defect in a tool.</p>
+<div class="scroll"><table>
+<thead><tr><th scope="col">Case</th><th scope="col">Expected</th><th scope="col">Basis</th>
+<th scope="col">dss</th><th scope="col">pdfsig</th><th scope="col">pyhanko</th></tr></thead>
+<tbody><tr><th scope="row"><span class="case">A1</span>Normal signature chained to the trusted test root</th><td>VALID</td><td>crypto</td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">A2</span>One byte changed inside the signed range</th><td>INVALID</td><td>crypto</td><td>INVALID<span class="score AGREE">AGREE</span></td><td>INVALID<span class="score AGREE">AGREE</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">B1</span>Signed by a leaf under a second test root that is in no trust store</th><td>INDETERMINATE</td><td>spec</td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">N1</span>Unsigned PDF, harness control</th><td>NO_<wbr>SIGNATURE</td><td>crypto</td><td>NO_<wbr>SIGNATURE<span class="score AGREE">AGREE</span></td><td>NO_<wbr>SIGNATURE<span class="score AGREE">AGREE</span></td><td>NO_<wbr>SIGNATURE<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">B2</span>Certificate expired, no timestamp</th><td>INDETERMINATE</td><td>spec</td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">C1</span>Second valid signature appended; judge the first signature</th><td>VALID_<wbr>WITH_<wbr>ALLOWED_<wbr>CHANGES</td><td>spec</td><td>VALID_<wbr>WITH_<wbr>ALLOWED_<wbr>CHANGES<span class="score AGREE">AGREE</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>ALLOWED_<wbr>CHANGES<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">C2</span>Certification signature permitting form fill, then a form field filled</th><td>VALID_<wbr>WITH_<wbr>ALLOWED_<wbr>CHANGES</td><td>spec</td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>ALLOWED_<wbr>CHANGES<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">C3</span>Certification signature permitting no changes, then a later change</th><td>INVALID</td><td>spec</td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">C4</span>Incremental update replaces page content so the visible amount changes</th><td>INVALID</td><td>policy</td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">C5</span>Synthetic Shadow Attack, Hide variant, written by us</th><td>INVALID</td><td>policy</td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">A3</span>ByteRange leaves a gap wider than /Contents, with content outside the signature</th><td>INVALID</td><td>spec</td><td>INVALID<span class="score AGREE">AGREE</span></td><td>VALID_<wbr>WITH_<wbr>UNCLASSIFIED_<wbr>CHANGES<span class="score PARTIAL">PARTIAL</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">B3</span>Certificate expired now; trusted timestamp proves signing during validity</th><td>VALID</td><td>spec</td><td>VALID<span class="score AGREE">AGREE</span></td><td>INDETERMINATE<span class="score OVER_REJECTED">OVER_REJECTED</span></td><td>INDETERMINATE<span class="score OVER_REJECTED">OVER_REJECTED</span></td></tr><tr><th scope="row"><span class="case">B4</span>Certificate revoked before signing, with a timestamp after revocation</th><td>INVALID</td><td>spec</td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>INVALID<span class="score AGREE">AGREE</span></td><td>INVALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">B5</span>Revocation source unreachable</th><td>INDETERMINATE</td><td>policy</td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td><td>TOOL_<wbr>ERROR<span class="score ERROR">ERROR</span></td><td>VALID<span class="score MISSED">MISSED</span></td></tr><tr><th scope="row"><span class="case">D1</span>Name shown on the page differs from the certificate subject</th><td>VALID</td><td>policy</td><td>VALID<span class="score INFO">INFO</span></td><td>VALID<span class="score INFO">INFO</span></td><td>VALID<span class="score INFO">INFO</span></td></tr><tr><th scope="row"><span class="case">E1</span>Valid signature timestamp from the local trusted TSA</th><td>VALID</td><td>spec</td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">E2</span>Signature timestamp from an untrusted local TSA</th><td>INDETERMINATE</td><td>policy</td><td>VALID<span class="score MISSED">MISSED</span></td><td>VALID<span class="score MISSED">MISSED</span></td><td>INDETERMINATE<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">F1</span>PDF/A-3b with embedded synthetic XML, signed, intact</th><td>VALID</td><td>spec</td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td><td>VALID<span class="score AGREE">AGREE</span></td></tr><tr><th scope="row"><span class="case">F3</span>XML and visible page disagree before signing; nothing changes after signing</th><td>VALID</td><td>policy</td><td>VALID<span class="score INFO">INFO</span></td><td>VALID<span class="score INFO">INFO</span></td><td>VALID<span class="score INFO">INFO</span></td></tr></tbody>
+</table></div>
+<p class="muted">Cases withheld from this table: 1</p>
+
+<h2>Scores</h2>
+<div class="scroll"><table class="counts"><tbody><tr><td class="AGREE">AGREE</td><td>35</td><td>Matches the expected verdict.</td></tr><tr><td class="PARTIAL">PARTIAL</td><td>10</td><td>Passes the signature without judging the change, or classifies it differently.</td></tr><tr><td class="INFO">INFO</td><td>6</td><td>Informational case, not scored.</td></tr><tr><td class="MISSED">MISSED</td><td>3</td><td>Expected a rejection, and the tool accepted.</td></tr><tr><td class="OVER_REJECTED">OVER_REJECTED</td><td>2</td><td>Expected acceptance, and the tool rejected.</td></tr><tr><td class="ERROR">ERROR</td><td>1</td><td>Output the mapping treats as a tool error.</td></tr></tbody></table></div>
+
+<h2>Tool versions</h2>
+<ul><li>dss: version=6.5.1, java=21.0.13</li><li>pdfsig: version=24.02.0, libnss3=2:3.98-1ubuntu0.3, poppler-utils=24.02.0-1ubuntu9.11</li><li>pyhanko: version=0.38.0, pyhanko-certvalidator=0.33.0</li></ul>
+
+<h2>Options</h2>
+<ul><li>dss: default validation policy; CommonTrustedCertificateSource(case trust anchor); OnlineCRLSource, OnlineOCSPSource and DefaultAIASource, for certificates with URLs</li><li>pdfsig: -nssdir &lt;temporary database containing only the case trust anchor&gt;</li><li>pyhanko: ValidationContext(trust_roots=[case trust anchor], allow_fetching=True)</li></ul>
+
+<h2>Reviewed findings</h2>
+<ul><li><strong>C1/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature. Its output has no field that classifies a later change, so it reports coverage without judging it.</li><li><strong>C2/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature. Its output has no field that classifies a later change, so it reports coverage without judging it.</li><li><strong>C2/dss</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): The object changes are all SignatureOrFormFill. The filled value also gives a visual difference warning, documented at WARN in the default policy. The mapping counts that as an other warning, which is why this is not an allowed change.</li><li><strong>C3/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature. Its output has no field that classifies a later change, so it reports coverage without judging it.</li><li><strong>C3/dss</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): TOTAL_PASSED with a DocMDP warning. The default policy documents DocMDP at WARN, so it reports the violation and does not fail the signature. A stricter policy could.</li><li><strong>C4/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature. Its output has no field that classifies a later change, so it reports coverage without judging it.</li><li><strong>C4/dss</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): TOTAL_PASSED with visual difference and undefined change warnings. The default policy documents both at WARN, so it reports the change and leaves the decision to the reader.</li><li><strong>C5/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature. Its output has no field that classifies a later change, so it reports coverage without judging it.</li><li><strong>C5/dss</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): TOTAL_PASSED with visual difference and undefined change warnings. The default policy documents both at WARN, so it reports the change and leaves the decision to the reader.</li><li><strong>A3/pdfsig</strong> <span class="PARTIAL">PARTIAL</span> (documented_behavior): Reports &quot;Not total document signed&quot; and a valid signature, which is accurate for a gap wider than /Contents. It does not say the signature structure is nonstandard.</li><li><strong>B5/pyhanko</strong> <span class="MISSED">MISSED</span> (documented_behavior): ValidationContext defaults to revocation_mode soft-fail, so an unreachable source does not change the result. The kit keeps that default. This is the API default, and the CLI has its own revocation options, which were not run.</li><li><strong>E2/pdfsig</strong> <span class="MISSED">MISSED</span> (documented_behavior): Its output has no field for a signature timestamp, so an untrusted timestamp cannot change the result.</li><li><strong>E2/dss</strong> <span class="MISSED">MISSED</span> (oracle_disputed): TOTAL_PASSED, and the timestamp is reported separately as INDETERMINATE, NO_CERTIFICATE_CHAIN_FOUND. DSS does not use it as proof of time, and the signature stands at the validation time. The oracle&#x27;s policy says offered but unproven evidence is insufficient. The expected value is unchanged, and this is for the owner to decide.</li></ul>
+</main>
+</body>
+</html>

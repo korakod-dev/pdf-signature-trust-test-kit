@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tester",
+      "runtimeExecutable": ".venv/bin/trustkit",
+      "runtimeArgs": ["serve"],
+      "port": 18770,
+      "url": "http://127.0.0.1:18770"
+    }
+  ]
+}
