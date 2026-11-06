@@ -14,8 +14,7 @@ veraPDF checking the files labeled PDF/A-3b). Group F is a simulated scenario, n
 conformance test. Milestone M5 is in draft: the results page, case study and clip are
 in [`drafts/`](drafts/), and are not final.
 
-**License:** none has been chosen, so this repository grants no rights to reuse its
-contents.
+**License:** [MIT](LICENSE).
 
 ## Results
 

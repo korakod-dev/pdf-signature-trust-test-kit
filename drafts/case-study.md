@@ -1,7 +1,7 @@
 # Case study: PDF Signature Trust Test Kit
 
 > **DRAFT. Not published and not approved for publication.** Open items are marked
-> `TODO`. Numbers come from CI run 41160827326 on commit `d86dbb8`, dated 2026-10-31.
+> `TODO`. Numbers come from [CI run 41162086344](https://github.com/korakod-dev/pdf-signature-trust-test-kit/actions/runs/41162086344) on commit `f276ef3`, dated 2026-10-31.
 
 ## Problem
 
@@ -67,7 +67,9 @@ same recipes before the first real run, because a report format cannot be learne
 other way. That behavior was therefore largely visible when the mapping was written.
 The mapping and some fixtures changed as a result, and the expected verdicts did not.
 
-`TODO`: the evidence links for this ordering depend on how the repository is released.
+The commits that show this ordering are listed in the README under
+[Commit order](https://github.com/korakod-dev/pdf-signature-trust-test-kit#commit-order), and each can be checked in the
+[public history](https://github.com/korakod-dev/pdf-signature-trust-test-kit/commits/main).
 
 ## Defects found
 
@@ -158,5 +160,7 @@ Results worth reading closely:
 
 - C5 is written from the published description of the Hide class in "Shadow Attacks:
   Hiding and Replacing Content in Signed PDFs" (NDSS 2021), and pdf-insecurity.org. Their
-  exploit files are not used. `TODO`: add the authors' names from the paper.
-- `TODO`: repository link, results page link, and license, once decided.
+  exploit files are not used. Authors: Christian Mainka, Vladislav Mladenov and Simon
+  Rohlmann (Ruhr University Bochum).
+- Repository: <https://github.com/korakod-dev/pdf-signature-trust-test-kit>. Results table: [`drafts/results.html`](https://github.com/korakod-dev/pdf-signature-trust-test-kit/blob/main/drafts/results.html).
+  License: MIT.
